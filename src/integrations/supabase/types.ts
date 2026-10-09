@@ -14,16 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          created_at: string
+          customer_name: string
+          id: string
+          phone: string | null
+          start_at: string
+          status: string
+          walk_in: boolean
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          id?: string
+          phone?: string | null
+          start_at: string
+          status?: string
+          walk_in?: boolean
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          id?: string
+          phone?: string | null
+          start_at?: string
+          status?: string
+          walk_in?: boolean
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_booking: {
+        Args: { _name: string; _phone: string; _start: string }
+        Returns: string
+      }
+      get_taken_slots: { Args: { _day: string }; Returns: string[] }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +208,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
