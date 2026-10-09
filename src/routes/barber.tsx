@@ -133,7 +133,7 @@ function Login() {
 
 function Dashboard() {
   const days = useMemo(() => nextDays(8), []);
-  const [day, setDay] = useState(days[0]);
+  const [day, setDay] = useState<string>(days[0]!);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [showQr, setShowQr] = useState(false);
   const [walkName, setWalkName] = useState("");
@@ -181,7 +181,7 @@ function Dashboard() {
   }
 
   async function addWalkIn() {
-    if (walkName.trim().length < 2) return toast.error("اكتب اسم الزبون");
+    if (walkName.trim().length < 2) { toast.error("اكتب اسم الزبون"); return; }
     const today = ammanDate();
     const { data } = await supabase.rpc("get_taken_slots", { _day: today });
     const taken = new Set(((data as unknown as string[]) ?? []).map((s) => new Date(s).getTime()));
@@ -189,14 +189,14 @@ function Dashboard() {
     const slot = slotsForDay(today).find(
       (s) => s.getTime() + SLOT_MIN * 60000 > now && !taken.has(s.getTime()),
     );
-    if (!slot) return toast.error("لا يوجد وقت فارغ اليوم");
+    if (!slot) { toast.error("لا يوجد وقت فارغ اليوم"); return; }
     const { error } = await supabase.from("bookings").insert({
       customer_name: walkName.trim(),
       phone: walkPhone.trim() || null,
       start_at: slot.toISOString(),
       walk_in: true,
     });
-    if (error) return toast.error("تعذر الإضافة");
+    if (error) { toast.error("تعذر الإضافة"); return; }
     toast.success(`تمت إضافة ${walkName} الساعة ${fmtTime(slot)}`);
     setWalkName("");
     setWalkPhone("");

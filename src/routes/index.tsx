@@ -34,7 +34,7 @@ async function fetchTaken(day: string): Promise<Date[]> {
 
 function Index() {
   const days = useMemo(() => nextDays(8), []);
-  const [day, setDay] = useState(days[0]);
+  const [day, setDay] = useState<string>(days[0]!);
   const [taken, setTaken] = useState<Date[]>([]);
   const [todayTaken, setTodayTaken] = useState<Date[]>([]);
   const [picked, setPicked] = useState<Date | null>(null);
@@ -61,9 +61,9 @@ function Index() {
   const takenSet = new Set(taken.map((t) => t.getTime()));
 
   async function book() {
-    if (!picked) return;
-    if (name.trim().length < 2) return toast.error("اكتب اسمك");
-    if (phone.replace(/\D/g, "").length < 7) return toast.error("اكتب رقم تلفون صحيح");
+    if (!picked) return undefined;
+    if (name.trim().length < 2) { toast.error("اكتب اسمك"); return; }
+    if (phone.replace(/\D/g, "").length < 7) { toast.error("اكتب رقم تلفون صحيح"); return; }
     setBusy(true);
     const { error } = await supabase.rpc("create_booking", {
       _name: name.trim(),
