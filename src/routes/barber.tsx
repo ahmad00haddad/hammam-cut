@@ -90,26 +90,16 @@ function Centered({ children }: { children: React.ReactNode }) {
 }
 
 function Login() {
-  const [mode, setMode] = useState<"in" | "up">("in");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    if (mode === "in") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error("البريد أو كلمة المرور غير صحيحة");
-    } else {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${window.location.origin}/barber` },
-      });
-      if (error) toast.error(error.message);
-      else if (!data.session) toast.success("تم إنشاء الحساب. افتح بريدك واضغط رابط التأكيد ثم سجّل الدخول.");
-    }
+    const u = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+    const { error } = await supabase.auth.signInWithPassword({ email: `${u}@hm-salon.local`, password });
+    if (error) toast.error("اسم المستخدم أو كلمة المرور غير صحيحة");
     setBusy(false);
   }
 
@@ -117,15 +107,10 @@ function Login() {
     <Centered>
       <h1 className="text-3xl font-bold text-gold">دخول الحلاق</h1>
       <form onSubmit={submit} className="space-y-3 text-right">
-        <Input type="email" dir="ltr" placeholder="البريد الإلكتروني" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12" />
-        <Input type="password" dir="ltr" placeholder="كلمة المرور" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="h-12" />
-        <Button variant="gold" size="xl" className="w-full" disabled={busy}>
-          {mode === "in" ? "دخول" : "إنشاء حساب"}
-        </Button>
+        <Input dir="ltr" autoCapitalize="none" autoComplete="username" placeholder="اسم المستخدم" value={username} onChange={(e) => setUsername(e.target.value)} required className="h-12" />
+        <Input type="password" dir="ltr" autoComplete="current-password" placeholder="كلمة المرور" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12" />
+        <Button variant="gold" size="xl" className="w-full" disabled={busy}>دخول</Button>
       </form>
-      <button className="text-sm text-muted-foreground" onClick={() => setMode(mode === "in" ? "up" : "in")}>
-        {mode === "in" ? "أول مرة؟ أنشئ حساب الحلاق" : "عندي حساب، تسجيل الدخول"}
-      </button>
       <Link to="/" className="text-xs text-muted-foreground">صفحة الحجز</Link>
     </Centered>
   );
