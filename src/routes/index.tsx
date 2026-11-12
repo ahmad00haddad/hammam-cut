@@ -1,7 +1,7 @@
 import { RazorMark } from "@/components/razor-mark";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, CalendarPlus, Check, Download, Home, MapPin, Ticket } from "lucide-react";
+import { ArrowRight, CalendarPlus, Check, Download, Home, MapPin, QrCode, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { notifyBooking } from "@/lib/telegram.functions";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { MapDialog, SHOP } from "@/components/shop-map";
 import { bookingIcsUrl } from "@/lib/calendar";
 import { MyBookingDialog, TOKEN_KEY } from "@/components/my-booking";
+import { QrDialog } from "@/components/qr-dialog";
 import { InstallDialog, type InstallPrompt } from "@/components/install-dialog";
 import {
   DEFAULT_STATE,
@@ -70,6 +71,7 @@ function Index() {
   const [mapOpen, setMapOpen] = useState(false);
   const [mineOpen, setMineOpen] = useState(false);
   const [installOpen, setInstallOpen] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
 
@@ -338,21 +340,25 @@ function Index() {
               {closed ? "الصالون مغلق هذا اليوم" : "عرض الأوقات"}
             </Button>
             <nav aria-label="التنقل" className="mx-auto flex w-fit items-center gap-1 rounded-3xl border border-white/10 bg-[#101010] p-1.5">
-              <span aria-current="page" className="flex h-14 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl bg-foreground text-background">
+              <span aria-current="page" className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl bg-foreground text-background">
                 <Home className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px] font-medium">الرئيسية</span>
               </span>
-              <button onClick={() => setMineOpen(true)} className="flex h-14 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setMineOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
                 <Ticket className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px]">حجزي</span>
               </button>
-              <button onClick={() => setMapOpen(true)} className="flex h-14 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setMapOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
                 <MapPin className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px]">الموقع</span>
               </button>
-              <button onClick={() => setInstallOpen(true)} className="flex h-14 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setInstallOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
                 <Download className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px]">تحميل</span>
+              </button>
+              <button onClick={() => setQrOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+                <QrCode className="h-5 w-5" strokeWidth={1.7} />
+                <span className="text-[11px]">QR</span>
               </button>
             </nav>
           </div>
@@ -535,6 +541,7 @@ function Index() {
 
       <MapDialog open={mapOpen} onOpenChange={setMapOpen} />
       <MyBookingDialog open={mineOpen} onOpenChange={setMineOpen} />
+      <QrDialog open={qrOpen} onOpenChange={setQrOpen} />
       <InstallDialog open={installOpen} onOpenChange={setInstallOpen} installPrompt={installPrompt} onInstalled={() => setInstallPrompt(null)} />
     </div>
   );
