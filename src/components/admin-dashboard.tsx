@@ -323,7 +323,7 @@ function NowTab() {
           <div className="text-lg font-bold">{s.booking_enabled ? "الحجز شغّال" : "الحجز متوقف"}</div>
           <div className="text-sm text-muted-foreground">{s.booking_enabled ? "الزباين بيقدروا يحجزوا" : "لا أحد يقدر يحجز الآن"}</div>
         </div>
-        <Switch checked={s.booking_enabled} onCheckedChange={(v) => save({ booking_enabled: v })} className="scale-125" />
+        <Switch checked={s.booking_enabled} onCheckedChange={(v) => save({ booking_enabled: v })} className="scale-125 shrink-0" />
       </section>
 
       <section className="space-y-3 rounded-2xl border bg-card p-5">
