@@ -73,6 +73,7 @@ export type Database = {
           id: string
           ip_hash: string | null
           notified_at: string | null
+          cancel_notified_at: string | null
           party_names: string[] | null
           party_size: number
           phone: string | null
@@ -93,6 +94,7 @@ export type Database = {
           id?: string
           ip_hash?: string | null
           notified_at?: string | null
+          cancel_notified_at?: string | null
           party_names?: string[] | null
           party_size?: number
           phone?: string | null
@@ -113,6 +115,7 @@ export type Database = {
           id?: string
           ip_hash?: string | null
           notified_at?: string | null
+          cancel_notified_at?: string | null
           party_names?: string[] | null
           party_size?: number
           phone?: string | null

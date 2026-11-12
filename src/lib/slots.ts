@@ -12,6 +12,7 @@ export type PublicState = {
   days_off: number[];
   window_days: number;
   max_party: number;
+  min_notice: number;
   busy: [string, string][];
 };
 
@@ -26,6 +27,7 @@ export const DEFAULT_STATE: PublicState = {
   days_off: [1],
   window_days: 7,
   max_party: 4,
+  min_notice: 0,
   busy: [],
 };
 
@@ -150,4 +152,13 @@ export function getDeviceId(): string {
   } catch {
     return "";
   }
+}
+
+/** Normalize Jordanian mobile input (07x, 7x, 962..., 00962...) to 07xxxxxxxx; null if invalid. */
+export function normalizeJoPhone(raw: string): string | null {
+  let d = raw.replace(/\D/g, "");
+  if (d.startsWith("00962")) d = d.slice(5);
+  else if (d.startsWith("962")) d = d.slice(3);
+  if (d.startsWith("0")) d = d.slice(1);
+  return /^7[789]\d{7}$/.test(d) ? `0${d}` : null;
 }

@@ -15,7 +15,7 @@ export const notifyBooking = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     // Only notify for fresh online bookings (prevents replaying old ids)
-    if (!b || b.walk_in || Date.now() - new Date(b.created_at).getTime() > 120000) return { ok: false };
+    if (!b || b.walk_in || Date.now() - new Date(b.created_at).getTime() > 600000) return { ok: false };
     // One notification per booking: claim it atomically so repeated calls with the same id can't spam the chat.
     // If the notified_at column is not migrated yet, fall back to the time window above.
     const { data: claimed, error: claimErr } = await supabaseAdmin
@@ -46,5 +46,42 @@ export const notifyBooking = createServerFn({ method: "POST" })
       // release the claim so a retry can still notify
       await supabaseAdmin.from("bookings").update({ notified_at: null }).eq("id", data.id);
     }
+    return { ok: res.ok };
+  });
+
+export const notifyCancel = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ token: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const bot = process.env["TELEGRAM_BOT_TOKEN"];
+    const chatId = process.env["TELEGRAM_CHAT_ID"];
+    if (!bot || !chatId) return { ok: false };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: b } = await supabaseAdmin
+      .from("bookings")
+      .select("id, customer_name, phone, start_at, party_size, status, walk_in")
+      .eq("public_token", data.token)
+      .maybeSingle();
+    if (!b || b.walk_in || b.status !== "cancelled") return { ok: false };
+    // one message per cancellation
+    const { data: claimed, error } = await supabaseAdmin
+      .from("bookings")
+      .update({ cancel_notified_at: new Date().toISOString() })
+      .eq("id", b.id)
+      .is("cancel_notified_at", null)
+      .select("id");
+    if (error || !claimed || claimed.length === 0) return { ok: false };
+    const when = new Date(b.start_at).toLocaleString("ar-JO", {
+      timeZone: "Asia/Amman", weekday: "long", day: "numeric", month: "numeric", hour: "numeric", minute: "2-digit",
+    });
+    const party = b.party_size > 1 ? ` (${b.party_size} أشخاص)` : "";
+    const res = await fetch(`https://api.telegram.org/bot${bot}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: `🚫 إلغاء حجز
+👤 ${b.customer_name}${party}
+📞 ${b.phone ?? "-"}
+🕒 ${when}` }),
+    });
+    if (!res.ok) await supabaseAdmin.from("bookings").update({ cancel_notified_at: null }).eq("id", b.id);
     return { ok: res.ok };
   });

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CalendarPlus, Check, Download, Home, MapPin, QrCode, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { notifyBooking } from "@/lib/telegram.functions";
+import { notifyBooking, notifyCancel } from "@/lib/telegram.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapDialog, SHOP } from "@/components/shop-map";
@@ -22,6 +22,7 @@ import {
   freeNow,
   getDeviceId,
   isDayOff,
+  normalizeJoPhone,
   nextDays,
   parseLimitError,
   shopStatus,
@@ -47,6 +48,24 @@ async function fetchState(day: string): Promise<PublicState> {
   return { ...DEFAULT_STATE, ...(data as unknown as PublicState) };
 }
 
+function readSaved(k: string): string {
+  try {
+    return typeof window === "undefined" ? "" : (localStorage.getItem(k) ?? "");
+  } catch {
+    return "";
+  }
+}
+
+async function notifyWithRetry(id: string) {
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await notifyBooking({ data: { id } });
+      if (r.ok) return;
+    } catch { /* retry */ }
+    await new Promise((res) => setTimeout(res, 2000 * (i + 1)));
+  }
+}
+
 type Result = { token: string; start: Date; party: number };
 
 const STEP_AR = ["١", "٢", "٣"];
@@ -62,8 +81,8 @@ function Index() {
   const [party, setParty] = useState(1);
   const [names, setNames] = useState<string[]>([]);
   const [picked, setPicked] = useState<Date | null>(null);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(() => readSaved("hm_name"));
+  const [phone, setPhone] = useState(() => readSaved("hm_phone"));
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [liveStatus, setLiveStatus] = useState<string | null>(null);
@@ -88,7 +107,8 @@ function Index() {
   // preselect the first open day (e.g. skip Monday) until the visitor picks one
   useEffect(() => {
     if (dayTouched) return;
-    const first = days.find((d) => !isDayOff(d, state));
+    const nowMs = Date.now();
+    const first = days.find((d) => !isDayOff(d, state) && (d !== ammanDate() || slotsForDay(d, state).some((s) => s.getTime() > nowMs - 5 * 60000 + state.min_notice * 60000)));
     if (first && first !== day) setDay(first);
   }, [days, state, day, dayTouched]);
 
@@ -111,7 +131,7 @@ function Index() {
   const ranges = useMemo(() => busyRanges(state), [state]);
   const slots = useMemo(() => {
     const now = Date.now();
-    return slotsForDay(day, state).filter((s) => s.getTime() > now - 5 * 60000);
+    return slotsForDay(day, state).filter((s) => s.getTime() > now - 5 * 60000 + state.min_notice * 60000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [day, state, tick]);
 
@@ -184,13 +204,14 @@ function Index() {
     if (!picked) return;
     const errs: { name?: string; phone?: string } = {};
     if (name.trim().length < 2) errs.name = "اكتب اسمك (حرفين على الأقل)";
-    if (phone.replace(/\D/g, "").length < 7) errs.phone = "اكتب رقم تلفون صحيح، مثلاً 0791234567";
+    const jo = normalizeJoPhone(phone);
+    if (!jo) errs.phone = "اكتب رقم موبايل أردني صحيح، مثلاً 0791234567";
     setErrors(errs);
     if (errs.name || errs.phone) return;
     setBusy(true);
     const { data, error } = await supabase.rpc("create_booking", {
       _name: name.trim(),
-      _phone: phone.trim(),
+      _phone: jo!,
       _start: picked.toISOString(),
       _party_size: party,
       _device_id: getDeviceId(),
@@ -203,13 +224,18 @@ function Index() {
       if (until) toast.error(`وصلت للحد الأقصى للحجوزات. تقدر تحجز مرة ثانية الساعة ${fmtTime(until)}`, { duration: 8000 });
       else if (m.includes("taken")) { toast.error("هذا الموعد انحجز، اختر موعدًا آخر"); setStep(1); }
       else if (m.includes("booking off") || m.includes("paused")) toast.error("الحجز متوقف حاليًا");
+      else if (m.includes("too many pending")) toast.error("في طلبات كثيرة قيد المراجعة حاليًا، جرّب بعد قليل");
+      else if (m.includes("past slot")) { toast.error("هذا الموعد لم يعد متاحًا، اختر موعدًا آخر"); setStep(1); }
+      else if (m.includes("invalid phone")) toast.error("رقم الموبايل غير صحيح");
+      else if (m.includes("closed day") || m.includes("after closing") || m.includes("too far") || m.includes("blocked period")) { toast.error("هذا الموعد غير متاح، اختر موعدًا آخر"); setStep(1); }
       else if (m.includes("not allowed")) toast.error("غير مسموح لك بالحجز");
       else toast.error("تعذر الحجز، حاول مرة أخرى");
       setTick((x) => x + 1);
       return;
     }
     const r = data as unknown as { id: string; token: string; status: string };
-    notifyBooking({ data: { id: r.id } }).catch(() => {});
+    void notifyWithRetry(r.id);
+    try { localStorage.setItem("hm_name", name.trim()); localStorage.setItem("hm_phone", jo!); } catch { /* ignore */ }
     try { localStorage.setItem(TOKEN_KEY, r.token); } catch { /* ignore */ }
     setLiveStatus(r.status);
     setResult({ token: r.token, start: picked, party });
@@ -220,6 +246,7 @@ function Index() {
   async function cancelMine() {
     if (!result) return;
     await supabase.rpc("cancel_my_booking", { _token: result.token });
+    notifyCancel({ data: { token: result.token } }).catch(() => {});
     setLiveStatus("cancelled");
     setTick((x) => x + 1);
   }
@@ -437,7 +464,7 @@ function Index() {
               </div>
               <div>
                 <Input
-                  placeholder="رقم التلفون"
+                  placeholder="رقم الموبايل (مثلاً 0791234567)"
                   aria-label="رقم التلفون"
                   aria-invalid={!!errors.phone}
                   type="tel"
@@ -519,7 +546,7 @@ function Index() {
                       </>
                     )}
                   </div>
-                  {result && (
+                  {result && liveStatus === "approved" && (
                     <a
                       href={bookingIcsUrl(result.start, state.service_minutes * result.party, SHOP)}
                       download="hm-booking.ics"

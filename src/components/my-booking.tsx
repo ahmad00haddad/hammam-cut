@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { notifyCancel } from "@/lib/telegram.functions";
 import { ammanDate, fmtDay, fmtTime } from "@/lib/slots";
 
 export const TOKEN_KEY = "hm_last_token";
@@ -52,6 +53,7 @@ export function MyBookingDialog({ open, onOpenChange }: { open: boolean; onOpenC
   async function cancel() {
     if (!token) return;
     await supabase.rpc("cancel_my_booking", { _token: token });
+    notifyCancel({ data: { token } }).catch(() => {});
     setInfo((i) => (i ? { ...i, status: "cancelled" } : i));
   }
 
