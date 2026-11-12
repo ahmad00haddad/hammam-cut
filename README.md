@@ -1,40 +1,62 @@
-# Hammam Cut
+<p align="center">
+  <img src="public/icon-512.png" alt="H&M razor logo" width="140" />
+</p>
 
-بدي اعمل تطبيق pwa .هاي خاص بعملية حجز  انا الصالون الحلاقه، انا الحلاق اسمي همام اسم صالوني h&m 
+<h1 align="center">صالون H&M — Hammam Cut</h1>
 
- بيفتح الصالون من الساعه  ص١٢ ال ١٠ ليلا
+<p align="center">
+  تطبيق ويب (PWA) لحجز مواعيد الحلاقة عند همام.<br />
+  PWA for booking a haircut at the H&M barber shop.
+</p>
 
-مدة الحلاقه تقريبا ٢٠ دقيقه
+<p align="center">
+  <b><a href="https://hammam-cut.lovable.app">hammam-cut.lovable.app</a></b>
+</p>
 
-بدي الناس تحجز الن
+<p align="center">
+  <img src="public/og-image.png" alt="H&M preview" width="640" />
+</p>
 
-موعد من خلال التطبيق و يظهر عندي الحجز على تلفوني مباشره و يجي الشخص على موعده الي حجزه ويبدأ الحلاقه مباشره على الموعد , في حال عدم وجود حجوزات في ذلك اليوم يظهر للمستخدم انو همام متاح الان للحلاقه , في حال أتى شخص فجاه بدون حجز على التطبيق أقوم أنا الحلاق بإدخاله على السيستم،
+## المزايا / Features
 
-اسعار الحلاقه تتراوح بين ال ٣ـ١٠ دنانير حسب الطلب و حسب الخدمة المقدمه.
+- **حجز بدون انتظار**: الزبون يختار اليوم والوقت (مدة الحلاقة ≈ ٢٠ دقيقة) ويحصل على تذكرة وملف تقويم.
+- **أوقات الدوام**: يوميًا من ١٢ ظهرًا حتى ١٠ مساءً، والاثنين عطلة. إذا لم يكن هناك حجوزات يظهر «همام متاح الآن».
+- **لوحة الحلاق** (`/barber`): تظهر الحجوزات مباشرة على الهاتف، مع قبول/رفض وإدخال زبون حضر بدون حجز وتصدير CSV.
+- **إشعارات تيليجرام**: كل حجز جديد يصل لهمام مع أزرار قبول/رفض وأوامر للمالك، وإشعار عند الإلغاء.
+- **تذكّر الزبون العائد**: الاسم والرقم وأسماء المرافقين، مع رسالة ترحيب وزر «انسَني».
+- **حجز لأكثر من شخص**، رقم هاتف أردني، حدود على الحجوزات المعلّقة والملغاة لمنع الإساءة.
+- **التثبيت على الهاتف**: عبر QR code أو زر المشاركة (أندرويد وآيفون)، يعمل كتطبيق مستقل.
+- **الأسعار**: من ٣ إلى ١٠ دنانير حسب الخدمة.
+- **الهوية**: شعار موس الحلاقة المتحرك (اضغط عليه ليُطوى/يُفتح)، تصميم داكن بلون عنابي، واجهة عربية RTL.
 
-تنزيل التطبيق على الهاتف من خلال qr code
+## التقنيات / Stack
 
-حتى يكون في سهوله للمستخدم
+TanStack Start (React + Vite) · Tailwind + shadcn/ui · Supabase (Postgres, RPC, RLS) · Drizzle · Telegram Bot API · Vitest.
 
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://hammam-cut.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/7793ec1c-b8ba-444c-ba20-7265abf15770).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## التطوير / Development
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
+git clone https://github.com/ahmad00haddad/hammam-cut.git
+cd hammam-cut
 npm i
-npm run dev
+npm run dev      # dev server
+npm test         # unit tests
+npm run build    # production build
 ```
+
+Migrations are in `supabase/` and `drizzle/`. Telegram webhook setup: `scripts/telegram-webhook.mjs`.
+
+## الصور ومعاينة الرابط / Icons & link preview
+
+- أيقونات التطبيق: `public/` (مصدر الشعار في `design/logo/`).
+- صورة معاينة الرابط (واتساب، فيسبوك، تيليجرام…): `public/og-image.png` (١٢٠٠×٦٣٠)، تُولَّد بـ `python scripts/make-og.py`.
+- عند تغيير الصورة ارفع رقم `?v=` في `src/routes/__root.tsx` ليُحدّث الجميع المعاينة المخزّنة.
+
+## التوثيق / Docs
+
+- [docs/SECURITY.md](docs/SECURITY.md) — ملاحظات الأمان
+- [docs/UPGRADE_PLAN.md](docs/UPGRADE_PLAN.md) — خطة التطوير
+
+## Credits
+
+Built with [Lovable](https://lovable.dev/projects/7793ec1c-b8ba-444c-ba20-7265abf15770); changes pushed to `main` sync back into Lovable.
