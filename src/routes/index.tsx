@@ -81,8 +81,9 @@ function Index() {
   const [party, setParty] = useState(1);
   const [names, setNames] = useState<string[]>([]);
   const [picked, setPicked] = useState<Date | null>(null);
-  const [name, setName] = useState(() => readSaved("hm_name"));
-  const [phone, setPhone] = useState(() => readSaved("hm_phone"));
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [returning, setReturning] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [liveStatus, setLiveStatus] = useState<string | null>(null);
@@ -93,6 +94,22 @@ function Index() {
   const [qrOpen, setQrOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
+
+  // returning customer: restore saved details (after mount, to avoid SSR mismatch)
+  useEffect(() => {
+    const n = readSaved("hm_name");
+    const p = readSaved("hm_phone");
+    if (n) { setName(n); setPhone(p); setReturning(true); }
+    try {
+      const saved = JSON.parse(readSaved("hm_names") || "[]");
+      if (Array.isArray(saved)) setNames(saved.filter((x): x is string => typeof x === "string").slice(0, 9));
+    } catch { /* ignore */ }
+  }, []);
+
+  function forgetMe() {
+    try { ["hm_name", "hm_phone", "hm_names"].forEach((k) => localStorage.removeItem(k)); } catch { /* ignore */ }
+    setName(""); setPhone(""); setNames([]); setReturning(false);
+  }
 
   useEffect(() => {
     fetchState(day).then(setState).catch(() => {});
@@ -235,7 +252,7 @@ function Index() {
     }
     const r = data as unknown as { id: string; token: string; status: string };
     void notifyWithRetry(r.id);
-    try { localStorage.setItem("hm_name", name.trim()); localStorage.setItem("hm_phone", jo!); } catch { /* ignore */ }
+    try { localStorage.setItem("hm_name", name.trim()); localStorage.setItem("hm_phone", jo!); localStorage.setItem("hm_names", JSON.stringify(names.map((n) => n.trim()).filter(Boolean).slice(0, party - 1))); } catch { /* ignore */ }
     try { localStorage.setItem(TOKEN_KEY, r.token); } catch { /* ignore */ }
     setLiveStatus(r.status);
     setResult({ token: r.token, start: picked, party });
@@ -309,7 +326,10 @@ function Index() {
               <RazorMark interactive className="h-5 w-auto" />
               <span className="font-serif text-xl font-bold tracking-wider">H&amp;M</span>
             </div>
-            <h1 className="text-4xl font-bold leading-tight">أهلاً بك</h1>
+            <h1 className="text-4xl font-bold leading-tight">{returning && name ? `أهلاً ${name.trim().split(/\s+/)[0]}` : "أهلاً بك"}</h1>
+            {returning && (
+              <button onClick={forgetMe} className="mt-1 text-xs text-muted-foreground underline underline-offset-4">لست أنت؟ امسح بياناتي</button>
+            )}
             <p className="mt-1 text-sm text-muted-foreground">الدوام ١٢ ظهرًا – ١٠ ليلًا · الاثنين عطلة</p>
             <p className="text-sm text-muted-foreground">الأسعار من ٣ إلى ١٠ دنانير حسب الخدمة</p>
             <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm">
@@ -442,6 +462,7 @@ function Index() {
         <section className={screenClass(2)} style={screenStyle(2)} aria-hidden={step !== 2} inert={step !== 2}>
           <div className="flex-1 overflow-y-auto px-5 pt-[5.5rem]">
             <h1 className="text-3xl font-bold">بياناتك</h1>
+            {returning && <p className="mt-1 text-xs text-muted-foreground">تذكرناك من المرة الماضية، عدّل أي حقل إذا تغيّر.</p>}
             {picked && (
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 <span className="rounded-full bg-card px-3 py-1.5">{fmtD.weekday}، {fmtD.date}</span>
