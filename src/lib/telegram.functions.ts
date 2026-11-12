@@ -16,6 +16,15 @@ export const notifyBooking = createServerFn({ method: "POST" })
       .maybeSingle();
     // Only notify for fresh online bookings (prevents replaying old ids)
     if (!b || b.walk_in || Date.now() - new Date(b.created_at).getTime() > 120000) return { ok: false };
+    // One notification per booking: claim it atomically so repeated calls with the same id can't spam the chat.
+    // If the notified_at column is not migrated yet, fall back to the time window above.
+    const { data: claimed, error: claimErr } = await supabaseAdmin
+      .from("bookings")
+      .update({ notified_at: new Date().toISOString() })
+      .eq("id", data.id)
+      .is("notified_at", null)
+      .select("id");
+    if (!claimErr && (!claimed || claimed.length === 0)) return { ok: false };
     const when = new Date(b.start_at).toLocaleString("ar-JO", {
       timeZone: "Asia/Amman", weekday: "long", day: "numeric", month: "numeric", hour: "numeric", minute: "2-digit",
     });
@@ -32,6 +41,10 @@ export const notifyBooking = createServerFn({ method: "POST" })
         ...(pending ? { reply_markup: bookingKeyboard(b.id, b.phone) } : {}),
       }),
     });
-    if (!res.ok) console.error("Telegram send failed", res.status, await res.text());
+    if (!res.ok) {
+      console.error("Telegram send failed", res.status, await res.text());
+      // release the claim so a retry can still notify
+      await supabaseAdmin.from("bookings").update({ notified_at: null }).eq("id", data.id);
+    }
     return { ok: res.ok };
   });

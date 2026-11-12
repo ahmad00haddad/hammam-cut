@@ -72,6 +72,7 @@ export type Database = {
           end_at: string
           id: string
           ip_hash: string | null
+          notified_at: string | null
           party_names: string[] | null
           party_size: number
           phone: string | null
@@ -91,6 +92,7 @@ export type Database = {
           end_at: string
           id?: string
           ip_hash?: string | null
+          notified_at?: string | null
           party_names?: string[] | null
           party_size?: number
           phone?: string | null
@@ -110,6 +112,7 @@ export type Database = {
           end_at?: string
           id?: string
           ip_hash?: string | null
+          notified_at?: string | null
           party_names?: string[] | null
           party_size?: number
           phone?: string | null

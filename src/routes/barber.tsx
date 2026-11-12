@@ -5,6 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RazorMark } from "@/components/razor-mark";
 import { AdminDashboard } from "@/components/admin-dashboard";
 
 export const Route = createFileRoute("/barber")({
@@ -75,6 +76,7 @@ function Login() {
 
   return (
     <Centered>
+      <RazorMark className="mx-auto h-9 w-auto text-foreground" />
       <h1 className="text-3xl font-bold text-gold">دخول الحلاق</h1>
       <form onSubmit={submit} className="space-y-3 text-right">
         <Input dir="ltr" autoCapitalize="none" autoComplete="username" placeholder="اسم المستخدم" value={username} onChange={(e) => setUsername(e.target.value)} required className="h-12" />

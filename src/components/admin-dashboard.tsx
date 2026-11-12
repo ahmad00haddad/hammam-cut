@@ -4,7 +4,9 @@ import { Archive, BarChart3, CalendarDays, Inbox, Settings, Zap, type LucideIcon
 import { toast } from "sonner";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
+import { csvRow } from "@/lib/csv";
 import { Button } from "@/components/ui/button";
+import { RazorMark } from "@/components/razor-mark";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -150,6 +152,7 @@ export function AdminDashboard() {
           <h1 className="text-2xl font-bold text-gold">أهلاً همام</h1>
           <p className="text-sm text-muted-foreground">لوحة التحكم</p>
         </div>
+        <RazorMark className="h-5 w-auto shrink-0 text-foreground/60" />
         <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>خروج</Button>
       </header>
 
@@ -612,9 +615,7 @@ function ArchiveTab() {
     const head = ["date", "time", "name", "phone", "people", "status", "walk_in"];
     const lines = shown.map((r) => {
       const d = new Date(r.start_at);
-      return [ammanDate(d), fmtTime(d), r.customer_name, r.phone ?? "", r.party_size, r.status, r.walk_in ? "yes" : "no"]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-        .join(",");
+      return csvRow([ammanDate(d), fmtTime(d), r.customer_name, r.phone ?? "", r.party_size, r.status, r.walk_in ? "yes" : "no"]);
     });
     const blob = new Blob(["﻿" + [head.join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
