@@ -1,5 +1,5 @@
 import { RazorMark } from "@/components/razor-mark";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CalendarPlus, Check, Download, Home, MapPin, QrCode, Ticket } from "lucide-react";
 import { toast } from "sonner";
@@ -361,6 +361,9 @@ function Index() {
                 <span className="text-[11px]">QR</span>
               </button>
             </nav>
+            <Link to="/barber" className="block pb-1 text-center text-xs text-muted-foreground transition hover:text-foreground">
+              دخول الحلاق
+            </Link>
           </div>
         </section>
 
