@@ -103,11 +103,12 @@ export function fmtTime(d: Date): string {
   }).format(d);
 }
 
-export function fmtDay(day: string): { weekday: string; date: string } {
+export function fmtDay(day: string): { weekday: string; date: string; num: string } {
   const d = new Date(`${day}T12:00:00${OFFSET}`);
   return {
     weekday: new Intl.DateTimeFormat("ar-JO", { timeZone: "Asia/Amman", weekday: "long" }).format(d),
     date: new Intl.DateTimeFormat("ar-JO", { timeZone: "Asia/Amman", day: "numeric", month: "short" }).format(d),
+    num: new Intl.DateTimeFormat("ar-JO", { timeZone: "Asia/Amman", day: "numeric" }).format(d),
   };
 }
 

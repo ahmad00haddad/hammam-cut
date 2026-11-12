@@ -59,8 +59,8 @@
   --border: #333232;
   --input: #333232;
   --ring: #8c2236;
-  --gradient-gold: linear-gradient(135deg, #7a1628, #641020 60%, #520c19);
-  --shadow-glow: 0 10px 40px -10px rgba(100, 16, 32, 0.7);
+  --gradient-gold: var(--primary);
+  --shadow-glow: none;
 }
 
 @layer base {
@@ -69,7 +69,6 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    background-image: radial-gradient(ellipse at top, rgba(100, 16, 32, 0.4), transparent 62%);
     background-attachment: fixed;
     min-height: 100vh;
   }
@@ -107,3 +106,6 @@
   position: absolute; inset: 3px; border-radius: 9999px;
   background: #4a9eff; box-shadow: 0 0 0 4px rgba(74, 158, 255, 0.3);
 }
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

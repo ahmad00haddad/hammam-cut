@@ -199,7 +199,7 @@ function Index() {
             <button
               onClick={() => setStep((s) => Math.max(0, s - 1))}
               aria-label="رجوع"
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary transition-opacity ${step > 0 && step < 3 ? "opacity-100" : "pointer-events-none opacity-0"}`}
+              className={`flex h-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary transition-all duration-300 ${step > 0 && step < 3 ? "w-8 opacity-100" : "pointer-events-none -me-3 w-0 opacity-0"}`}
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -247,7 +247,7 @@ function Index() {
             </p>
 
             <h2 className="mt-4 text-lg font-bold">اليوم</h2>
-            <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2">
+            <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2">
               {days.map((d, i) => {
                 const f = fmtDay(d);
                 const active = d === day;
@@ -257,12 +257,12 @@ function Index() {
                     key={d}
                     onClick={() => { setDay(d); setDayTouched(true); setPicked(null); }}
                     aria-pressed={active}
-                    className={`min-w-[72px] shrink-0 rounded-2xl px-3 py-3 text-center transition active:scale-95 ${
+                    className={`min-w-[64px] flex-1 shrink-0 rounded-2xl px-3 py-3 text-center transition active:scale-95 ${
                       active ? "bg-primary text-primary-foreground" : "bg-card"
                     } ${off ? "opacity-40" : ""}`}
                   >
                     <div className={`text-xs ${active ? "opacity-80" : "text-muted-foreground"}`}>{i === 0 ? "اليوم" : f.weekday}</div>
-                    <div className="mt-1 text-xl font-bold">{f.date}</div>
+                    <div className="mt-1 text-xl font-bold">{f.num}</div>
                   </button>
                 );
               })}
