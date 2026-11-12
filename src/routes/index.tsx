@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { notifyBooking } from "@/lib/telegram.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShopMap } from "@/components/shop-map";
+import { MapButton } from "@/components/shop-map";
 import {
   DEFAULT_STATE,
   type PublicState,
@@ -152,7 +152,8 @@ function Index() {
 
   return (
     <main className="mx-auto max-w-lg px-5 pb-16 pt-10">
-      <header className="text-center">
+      <header className="relative text-center">
+        <MapButton />
         <img src="/icon-192.png" alt="شعار صالون H&M" width={88} height={88} className="mx-auto rounded-2xl shadow-glow" />
         <h1 className="mt-5 text-4xl font-bold text-gold">صالون H&M</h1>
         <p className="mt-2 text-muted-foreground">مع الحلاق همام · ١٢ ظهرًا – ١٠ مساءً · الاثنين عطلة</p>
@@ -309,11 +310,6 @@ function Index() {
           )}
         </>
       )}
-
-      <section className="mt-12">
-        <h2 className="mb-3 text-lg font-bold">موقع الصالون</h2>
-        <ShopMap />
-      </section>
 
       <footer className="mt-10 text-center text-xs text-muted-foreground">
         <Link to="/barber" className="hover:text-foreground">دخول الحلاق</Link>
