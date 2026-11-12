@@ -17,6 +17,7 @@ import {
   nextDays,
   slotFits,
   slotsForDay,
+  stepMin,
 } from "@/lib/slots";
 
 export type Booking = {
@@ -279,6 +280,7 @@ function NowTab() {
       customer_name: walkName.trim(),
       phone: walkPhone.trim() || null,
       start_at: slot.toISOString(),
+      end_at: new Date(slot.getTime() + stepMin(st) * 60000).toISOString(),
       walk_in: true,
       status: "approved",
     });
