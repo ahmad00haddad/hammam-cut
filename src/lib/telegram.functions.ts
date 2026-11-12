@@ -10,7 +10,7 @@ export const notifyBooking = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: b } = await supabaseAdmin
       .from("bookings")
-      .select("customer_name, phone, start_at, created_at, walk_in")
+      .select("customer_name, phone, start_at, created_at, walk_in, party_size, status")
       .eq("id", data.id)
       .maybeSingle();
     // Only notify for fresh online bookings (prevents replaying old ids)
@@ -18,7 +18,9 @@ export const notifyBooking = createServerFn({ method: "POST" })
     const when = new Date(b.start_at).toLocaleString("ar-JO", {
       timeZone: "Asia/Amman", weekday: "long", day: "numeric", month: "numeric", hour: "numeric", minute: "2-digit",
     });
-    const text = `💈 حجز جديد\n👤 ${b.customer_name}\n📞 ${b.phone ?? "-"}\n🕒 ${when}`;
+    const party = b.party_size > 1 ? `\n👥 ${b.party_size} أشخاص` : "";
+    const state = b.status === "pending" ? "\n⏳ بانتظار موافقتك من لوحة الحلاق" : "\n✅ مؤكد تلقائيًا";
+    const text = `💈 حجز جديد\n👤 ${b.customer_name}\n📞 ${b.phone ?? "-"}\n🕒 ${when}${party}${state}`;
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

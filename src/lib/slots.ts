@@ -1,8 +1,43 @@
-// Shop runs on Amman time (UTC+3, no DST).
-export const OPEN_MIN = 12 * 60;
-export const CLOSE_MIN = 22 * 60;
-export const SLOT_MIN = 20;
+// Shop runs on Amman time (UTC+3, no DST). All hours/durations come from the `settings` row.
 export const OFFSET = "+03:00";
+
+export type PublicState = {
+  enabled: boolean;
+  pause_until: string | null;
+  pause_reason: string | null;
+  service_minutes: number;
+  buffer_minutes: number;
+  open_min: number;
+  close_min: number;
+  days_off: number[];
+  window_days: number;
+  max_party: number;
+  busy: [string, string][];
+};
+
+export const DEFAULT_STATE: PublicState = {
+  enabled: true,
+  pause_until: null,
+  pause_reason: null,
+  service_minutes: 20,
+  buffer_minutes: 5,
+  open_min: 720,
+  close_min: 1320,
+  days_off: [1],
+  window_days: 7,
+  max_party: 4,
+  busy: [],
+};
+
+export type Range = { start: number; end: number };
+
+export function busyRanges(s: PublicState): Range[] {
+  return s.busy.map(([a, b]) => ({ start: new Date(a).getTime(), end: new Date(b).getTime() }));
+}
+
+export function stepMin(s: PublicState): number {
+  return s.service_minutes + s.buffer_minutes;
+}
 
 export function ammanDate(d: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Amman" }).format(d);
@@ -20,18 +55,35 @@ export function ammanMinutes(d: Date = new Date()): number {
   return h * 60 + m;
 }
 
-export function isMonday(day: string): boolean {
-  return new Date(`${day}T12:00:00${OFFSET}`).getUTCDay() === 1;
+/** ISO weekday 1..7 (Mon..Sun) of an Amman calendar day. */
+export function isoWeekday(day: string): number {
+  const w = new Date(`${day}T12:00:00${OFFSET}`).getUTCDay();
+  return w === 0 ? 7 : w;
 }
 
-export function slotsForDay(day: string): Date[] {
+export function isDayOff(day: string, s: PublicState): boolean {
+  return s.days_off.includes(isoWeekday(day));
+}
+
+/** Start times of every grid slot in the day (service + buffer apart). */
+export function slotsForDay(day: string, s: PublicState): Date[] {
   const out: Date[] = [];
-  for (let m = OPEN_MIN; m + SLOT_MIN <= CLOSE_MIN; m += SLOT_MIN) {
+  const step = stepMin(s);
+  for (let m = s.open_min; m + s.service_minutes <= s.close_min; m += step) {
     const hh = String(Math.floor(m / 60)).padStart(2, "0");
     const mm = String(m % 60).padStart(2, "0");
     out.push(new Date(`${day}T${hh}:${mm}:00${OFFSET}`));
   }
   return out;
+}
+
+/** A party of n needs n consecutive steps; the last buffer may run past closing. */
+export function slotFits(start: Date, party: number, s: PublicState, busy: Range[]): boolean {
+  const t = start.getTime();
+  const end = t + stepMin(s) * party * 60000;
+  const mins = ammanMinutes(start);
+  if (mins + stepMin(s) * party - s.buffer_minutes > s.close_min) return false;
+  return !busy.some((r) => t < r.end && end > r.start);
 }
 
 export function nextDays(n: number): string[] {
@@ -59,18 +111,42 @@ export function fmtDay(day: string): { weekday: string; date: string } {
   };
 }
 
-export function isOpenNow(): boolean {
-  const today = ammanDate();
+export function isOpenNow(s: PublicState): boolean {
   const m = ammanMinutes();
-  return !isMonday(today) && m >= OPEN_MIN && m < CLOSE_MIN;
+  return s.enabled && !isDayOff(ammanDate(), s) && m >= s.open_min && m < s.close_min;
 }
 
-/** Barber is free now if open and no active booking covers the current 20-min window. */
-export function freeNow(taken: Date[]): boolean {
-  if (!isOpenNow()) return false;
+/** Barber is free now if open, not paused, and no booking/block covers this moment. */
+export function freeNow(s: PublicState): boolean {
+  if (!isOpenNow(s)) return false;
   const now = Date.now();
-  return !taken.some((t) => {
-    const s = t.getTime();
-    return now >= s - 5 * 60000 && now < s + SLOT_MIN * 60000;
-  });
+  return !busyRanges(s).some((r) => now >= r.start - 5 * 60000 && now < r.end);
+}
+
+export type Status = "open" | "off" | "paused" | "closed";
+export function shopStatus(s: PublicState): Status {
+  if (!s.enabled) return "off";
+  if (s.pause_until && new Date(s.pause_until).getTime() > Date.now()) return "paused";
+  return "open";
+}
+
+export function parseLimitError(msg: string): Date | null {
+  const m = msg.match(/limit reached (\S+)/);
+  if (!m) return null;
+  const d = new Date(m[1]!);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+const DEVICE_KEY = "hm_device_id";
+export function getDeviceId(): string {
+  try {
+    let id = localStorage.getItem(DEVICE_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(DEVICE_KEY, id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
 }

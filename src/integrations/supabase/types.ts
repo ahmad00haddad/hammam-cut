@@ -16,31 +16,127 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
+          admin_note: string | null
           created_at: string
           customer_name: string
+          decided_at: string | null
+          device_id: string | null
+          end_at: string
           id: string
+          ip_hash: string | null
+          party_names: string[] | null
+          party_size: number
           phone: string | null
+          phone_norm: string | null
+          public_token: string
+          reject_reason: string | null
           start_at: string
           status: string
           walk_in: boolean
         }
         Insert: {
+          admin_note?: string | null
           created_at?: string
           customer_name: string
+          decided_at?: string | null
+          device_id?: string | null
+          end_at?: string
           id?: string
+          ip_hash?: string | null
+          party_names?: string[] | null
+          party_size?: number
           phone?: string | null
+          phone_norm?: string | null
+          public_token?: string
+          reject_reason?: string | null
           start_at: string
           status?: string
           walk_in?: boolean
         }
         Update: {
+          admin_note?: string | null
           created_at?: string
           customer_name?: string
+          decided_at?: string | null
+          device_id?: string | null
+          end_at?: string
           id?: string
+          ip_hash?: string | null
+          party_names?: string[] | null
+          party_size?: number
           phone?: string | null
+          phone_norm?: string | null
+          public_token?: string
+          reject_reason?: string | null
           start_at?: string
           status?: string
           walk_in?: boolean
+        }
+        Relationships: []
+      }
+      blocked_clients: {
+        Row: { created_at: string; id: string; kind: string; reason: string | null; value: string }
+        Insert: { created_at?: string; id?: string; kind: string; reason?: string | null; value: string }
+        Update: { created_at?: string; id?: string; kind?: string; reason?: string | null; value?: string }
+        Relationships: []
+      }
+      blocks: {
+        Row: { created_at: string; end_at: string; id: string; reason: string | null; start_at: string }
+        Insert: { created_at?: string; end_at: string; id?: string; reason?: string | null; start_at: string }
+        Update: { created_at?: string; end_at?: string; id?: string; reason?: string | null; start_at?: string }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          auto_approve: boolean
+          booking_enabled: boolean
+          booking_window_days: number
+          buffer_minutes: number
+          close_min: number
+          days_off: number[]
+          id: number
+          max_bookings_per_device_24h: number
+          max_party_size: number
+          min_notice_minutes: number
+          open_min: number
+          pause_reason: string | null
+          pause_until: string | null
+          service_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          auto_approve?: boolean
+          booking_enabled?: boolean
+          booking_window_days?: number
+          buffer_minutes?: number
+          close_min?: number
+          days_off?: number[]
+          id?: number
+          max_bookings_per_device_24h?: number
+          max_party_size?: number
+          min_notice_minutes?: number
+          open_min?: number
+          pause_reason?: string | null
+          pause_until?: string | null
+          service_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_approve?: boolean
+          booking_enabled?: boolean
+          booking_window_days?: number
+          buffer_minutes?: number
+          close_min?: number
+          days_off?: number[]
+          id?: number
+          max_bookings_per_device_24h?: number
+          max_party_size?: number
+          min_notice_minutes?: number
+          open_min?: number
+          pause_reason?: string | null
+          pause_until?: string | null
+          service_minutes?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -67,11 +163,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_my_booking: { Args: { _token: string }; Returns: boolean }
       create_booking: {
-        Args: { _name: string; _phone: string; _start: string }
-        Returns: string
+        Args: {
+          _device_id?: string
+          _name: string
+          _party_names?: string[]
+          _party_size?: number
+          _phone: string
+          _start: string
+        }
+        Returns: Json
       }
-      get_taken_slots: { Args: { _day: string }; Returns: string[] }
+      get_booking_status: { Args: { _token: string }; Returns: Json }
+      get_public_state: { Args: { _day: string }; Returns: Json }
+      get_stats: { Args: { _from: string; _to: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
