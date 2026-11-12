@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyBooking } from "@/lib/telegram.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -65,7 +66,7 @@ function Index() {
     if (name.trim().length < 2) { toast.error("اكتب اسمك"); return; }
     if (phone.replace(/\D/g, "").length < 7) { toast.error("اكتب رقم تلفون صحيح"); return; }
     setBusy(true);
-    const { error } = await supabase.rpc("create_booking", {
+    const { data: newId, error } = await supabase.rpc("create_booking", {
       _name: name.trim(),
       _phone: phone.trim(),
       _start: picked.toISOString(),
@@ -76,6 +77,7 @@ function Index() {
       setTick((x) => x + 1);
       return;
     }
+    if (newId) notifyBooking({ data: { id: newId as string } }).catch(() => {});
     setDone(picked);
     setPicked(null);
     setTick((x) => x + 1);
