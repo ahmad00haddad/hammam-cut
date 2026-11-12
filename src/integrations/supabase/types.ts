@@ -65,6 +65,7 @@ export type Database = {
       bookings: {
         Row: {
           admin_note: string | null
+          cancel_notified_at: string | null
           created_at: string
           customer_name: string
           decided_at: string | null
@@ -72,8 +73,6 @@ export type Database = {
           end_at: string
           id: string
           ip_hash: string | null
-          notified_at: string | null
-          cancel_notified_at: string | null
           party_names: string[] | null
           party_size: number
           phone: string | null
@@ -86,6 +85,7 @@ export type Database = {
         }
         Insert: {
           admin_note?: string | null
+          cancel_notified_at?: string | null
           created_at?: string
           customer_name: string
           decided_at?: string | null
@@ -93,8 +93,6 @@ export type Database = {
           end_at: string
           id?: string
           ip_hash?: string | null
-          notified_at?: string | null
-          cancel_notified_at?: string | null
           party_names?: string[] | null
           party_size?: number
           phone?: string | null
@@ -107,6 +105,7 @@ export type Database = {
         }
         Update: {
           admin_note?: string | null
+          cancel_notified_at?: string | null
           created_at?: string
           customer_name?: string
           decided_at?: string | null
@@ -114,8 +113,6 @@ export type Database = {
           end_at?: string
           id?: string
           ip_hash?: string | null
-          notified_at?: string | null
-          cancel_notified_at?: string | null
           party_names?: string[] | null
           party_size?: number
           phone?: string | null
@@ -217,6 +214,7 @@ export type Database = {
         }
         Returns: Json
       }
+      expire_pending: { Args: never; Returns: undefined }
       get_booking_status: { Args: { _token: string }; Returns: Json }
       get_public_state: { Args: { _day: string }; Returns: Json }
       get_stats: { Args: { _from: string; _to: string }; Returns: Json }
