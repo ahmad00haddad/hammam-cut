@@ -1,3 +1,4 @@
+import { RazorMark } from "@/components/razor-mark";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CalendarPlus, Check, Download, Home, MapPin, Ticket } from "lucide-react";
@@ -265,6 +266,7 @@ function Index() {
                 </div>
               ))}
             </div>
+            <RazorMark className={`h-4 w-auto shrink-0 text-foreground/60 transition-opacity duration-300 ${step > 0 ? "opacity-100" : "opacity-0"}`} />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             {step < 3 ? `الخطوة ${STEP_AR[step]} من ٣` : "تم"}
@@ -274,6 +276,10 @@ function Index() {
         {/* step 1: welcome + people + day */}
         <section className={screenClass(0)} style={screenStyle(0)} aria-hidden={step !== 0} inert={step !== 0}>
           <div className="flex-1 overflow-y-auto px-5 pt-[5.5rem]">
+            <div className="mb-4 flex items-center gap-3 text-foreground">
+              <RazorMark className="h-5 w-auto" />
+              <span className="font-serif text-xl font-bold tracking-wider">H&amp;M</span>
+            </div>
             <h1 className="text-4xl font-bold leading-tight">أهلاً بك</h1>
             <p className="mt-1 text-sm text-muted-foreground">الدوام ١٢ ظهرًا – ١٠ ليلًا · الاثنين عطلة</p>
             <p className="text-sm text-muted-foreground">الأسعار من ٣ إلى ١٠ دنانير حسب الخدمة</p>
