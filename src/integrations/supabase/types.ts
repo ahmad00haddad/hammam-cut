@@ -90,7 +90,7 @@ export type Database = {
           customer_name: string
           decided_at?: string | null
           device_id?: string | null
-          end_at: string
+          end_at?: string
           id?: string
           ip_hash?: string | null
           party_names?: string[] | null
