@@ -8,7 +8,7 @@ export type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: P
 type Platform = "ios" | "android" | "desktop";
 
 export function detectPlatform(): { platform: Platform; iosNotSafari: boolean; installed: boolean } {
-  if (typeof navigator === "undefined") return { platform: "android", iosNotSafari: false, installed: false };
+  if (typeof window === "undefined" || typeof navigator === "undefined") return { platform: "android", iosNotSafari: false, installed: false };
   const ua = navigator.userAgent;
   const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const android = /Android/.test(ua);

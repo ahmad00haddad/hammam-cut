@@ -76,7 +76,7 @@ function Login() {
 
   return (
     <Centered>
-      <RazorMark className="mx-auto h-7 w-auto text-foreground" />
+      <RazorMark animated className="mx-auto h-7 w-auto text-foreground" />
       <h1 className="text-3xl font-bold text-gold">دخول الحلاق</h1>
       <form onSubmit={submit} className="space-y-3 text-right">
         <Input dir="ltr" autoCapitalize="none" autoComplete="username" placeholder="اسم المستخدم" value={username} onChange={(e) => setUsername(e.target.value)} required className="h-12" />

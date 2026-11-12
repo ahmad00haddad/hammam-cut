@@ -279,7 +279,7 @@ function Index() {
         <section className={screenClass(0)} style={screenStyle(0)} aria-hidden={step !== 0} inert={step !== 0}>
           <div className="flex-1 overflow-y-auto px-5 pt-[5.5rem]">
             <div className="mb-4 flex items-center gap-3 text-foreground">
-              <RazorMark className="h-5 w-auto" />
+              <RazorMark animated className="h-5 w-auto" />
               <span className="font-serif text-xl font-bold tracking-wider">H&amp;M</span>
             </div>
             <h1 className="text-4xl font-bold leading-tight">أهلاً بك</h1>

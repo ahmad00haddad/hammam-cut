@@ -109,3 +109,20 @@
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Razor logo: handle swings open once, then a glint crosses the blade */
+@keyframes razor-open {
+  from { transform: rotate(-196deg); }
+  70% { transform: rotate(-10deg); }
+  to { transform: rotate(-16deg); }
+}
+@keyframes razor-glint {
+  from { transform: translateX(0) skewX(-20deg); opacity: 0; }
+  15% { opacity: .75; }
+  to { transform: translateX(170px) skewX(-20deg); opacity: 0; }
+}
+.razor-animated .razor-handle { animation: razor-open 750ms cubic-bezier(.2, .8, .2, 1) 150ms both; }
+.razor-animated .razor-glint { animation: razor-glint 700ms ease-in-out 950ms both; opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .razor-animated .razor-handle, .razor-animated .razor-glint { animation: none; }
+}
