@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Check, Home, MapPin, Ticket } from "lucide-react";
+import { ArrowRight, CalendarPlus, Check, Download, Home, MapPin, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { notifyBooking } from "@/lib/telegram.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapDialog } from "@/components/shop-map";
+import { MapDialog, SHOP } from "@/components/shop-map";
+import { bookingIcsUrl } from "@/lib/calendar";
 import { MyBookingDialog, TOKEN_KEY } from "@/components/my-booking";
+import { InstallDialog, type InstallPrompt } from "@/components/install-dialog";
 import {
   DEFAULT_STATE,
   type PublicState,
@@ -66,6 +68,9 @@ function Index() {
   const [tick, setTick] = useState(0);
   const [mapOpen, setMapOpen] = useState(false);
   const [mineOpen, setMineOpen] = useState(false);
+  const [installOpen, setInstallOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
+  const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
 
   useEffect(() => {
     fetchState(day).then(setState).catch(() => {});
@@ -115,6 +120,50 @@ function Index() {
     setPicked(first ?? null);
   }, [step, slots, party, state, picked, ranges]);
 
+  useEffect(() => {
+    const onPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as InstallPrompt);
+    };
+    window.addEventListener("beforeinstallprompt", onPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", onPrompt);
+  }, []);
+
+  function clearErr(k: "name" | "phone") {
+    setErrors((x) => {
+      const n = { ...x };
+      delete n[k];
+      return n;
+    });
+  }
+
+  // keep the browser/phone back button inside the flow
+  function goStep(n: number) {
+    if (n > step && n <= 2) {
+      try {
+        window.history.pushState({ ...(window.history.state ?? {}), hmStep: n }, "");
+      } catch {
+        /* ignore */
+      }
+    }
+    setStep(n);
+  }
+
+  function goBack() {
+    const hs = typeof window !== "undefined" ? (window.history.state as { hmStep?: number } | null)?.hmStep : undefined;
+    if (hs && hs === step) window.history.back();
+    else setStep((v) => Math.max(0, v - 1));
+  }
+
+  useEffect(() => {
+    const onPop = () => {
+      const hs = (window.history.state as { hmStep?: number } | null)?.hmStep ?? 0;
+      setStep((cur) => (cur === 3 ? cur : Math.min(hs, 2)));
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
   function changeParty(n: number) {
     setParty(n);
     setPicked(null);
@@ -130,8 +179,11 @@ function Index() {
 
   async function book() {
     if (!picked) return;
-    if (name.trim().length < 2) { toast.error("اكتب اسمك"); return; }
-    if (phone.replace(/\D/g, "").length < 7) { toast.error("اكتب رقم تلفون صحيح"); return; }
+    const errs: { name?: string; phone?: string } = {};
+    if (name.trim().length < 2) errs.name = "اكتب اسمك (حرفين على الأقل)";
+    if (phone.replace(/\D/g, "").length < 7) errs.phone = "اكتب رقم تلفون صحيح، مثلاً 0791234567";
+    setErrors(errs);
+    if (errs.name || errs.phone) return;
     setBusy(true);
     const { data, error } = await supabase.rpc("create_booking", {
       _name: name.trim(),
@@ -197,7 +249,7 @@ function Index() {
         <header className="absolute inset-x-0 top-0 z-10 bg-background px-5 pb-3 pt-5">
           <div className="flex h-8 items-center gap-3">
             <button
-              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              onClick={goBack}
               aria-label="رجوع"
               className={`flex h-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary transition-all duration-300 ${step > 0 && step < 3 ? "w-8 opacity-100" : "pointer-events-none -me-3 w-0 opacity-0"}`}
             >
@@ -224,6 +276,7 @@ function Index() {
           <div className="flex-1 overflow-y-auto px-5 pt-[5.5rem]">
             <h1 className="text-4xl font-bold leading-tight">أهلاً بك</h1>
             <p className="mt-1 text-sm text-muted-foreground">الدوام ١٢ ظهرًا – ١٠ ليلًا · الاثنين عطلة</p>
+            <p className="text-sm text-muted-foreground">الأسعار من ٣ إلى ١٠ دنانير حسب الخدمة</p>
             <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm">
               <span className={`h-2 w-2 shrink-0 rounded-full ${statusChip.dot}`} />
               {statusChip.text}
@@ -274,19 +327,26 @@ function Index() {
               size="xl"
               className="w-full rounded-2xl"
               disabled={!canBook || closed}
-              onClick={() => setStep(1)}
+              onClick={() => goStep(1)}
             >
               {closed ? "الصالون مغلق هذا اليوم" : "عرض الأوقات"}
             </Button>
-            <nav aria-label="التنقل" className="mx-auto flex w-fit items-center gap-1 rounded-full border border-white/10 bg-[#101010] p-1.5">
-              <span aria-current="page" className="flex h-11 w-11 items-center justify-center rounded-full bg-foreground text-background">
+            <nav aria-label="التنقل" className="mx-auto flex w-fit items-center gap-1 rounded-3xl border border-white/10 bg-[#101010] p-1.5">
+              <span aria-current="page" className="flex h-14 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl bg-foreground text-background">
                 <Home className="h-5 w-5" strokeWidth={1.7} />
+                <span className="text-[11px] font-medium">الرئيسية</span>
               </span>
-              <button onClick={() => setMineOpen(true)} aria-label="حجزي" className="flex h-11 w-11 items-center justify-center rounded-full text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setMineOpen(true)} className="flex h-14 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
                 <Ticket className="h-5 w-5" strokeWidth={1.7} />
+                <span className="text-[11px]">حجزي</span>
               </button>
-              <button onClick={() => setMapOpen(true)} aria-label="موقع الصالون" className="flex h-11 w-11 items-center justify-center rounded-full text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setMapOpen(true)} className="flex h-14 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
                 <MapPin className="h-5 w-5" strokeWidth={1.7} />
+                <span className="text-[11px]">الموقع</span>
+              </button>
+              <button onClick={() => setInstallOpen(true)} className="flex h-14 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+                <Download className="h-5 w-5" strokeWidth={1.7} />
+                <span className="text-[11px]">تحميل</span>
               </button>
             </nav>
           </div>
@@ -330,7 +390,7 @@ function Index() {
             )}
           </div>
           <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
-            <Button variant="gold" size="xl" className="w-full rounded-2xl" disabled={!picked} onClick={() => setStep(2)}>
+            <Button variant="gold" size="xl" className="w-full rounded-2xl" disabled={!picked} onClick={() => goStep(2)}>
               متابعة
             </Button>
           </div>
@@ -348,18 +408,37 @@ function Index() {
               </div>
             )}
             <div className="mt-6 space-y-3">
-              <Input placeholder="الاسم" aria-label="الاسم" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} className="h-12 rounded-xl" />
-              <Input
-                placeholder="رقم التلفون"
-                aria-label="رقم التلفون"
-                type="tel"
-                inputMode="tel"
-                dir="ltr"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                maxLength={20}
-                className="h-12 rounded-xl text-right"
-              />
+              <div>
+                <Input
+                  placeholder="الاسم"
+                  aria-label="الاسم"
+                  aria-invalid={!!errors.name}
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); clearErr("name"); }}
+                  maxLength={60}
+                  className={`h-12 rounded-xl ${errors.name ? "border-destructive" : ""}`}
+                />
+                {errors.name && <p role="alert" className="mt-1.5 text-xs text-destructive">{errors.name}</p>}
+              </div>
+              <div>
+                <Input
+                  placeholder="رقم التلفون"
+                  aria-label="رقم التلفون"
+                  aria-invalid={!!errors.phone}
+                  type="tel"
+                  inputMode="tel"
+                  dir="ltr"
+                  value={phone}
+                  onChange={(e) => { setPhone(e.target.value); clearErr("phone"); }}
+                  maxLength={20}
+                  className={`h-12 rounded-xl text-right ${errors.phone ? "border-destructive" : ""}`}
+                />
+                {errors.phone ? (
+                  <p role="alert" className="mt-1.5 text-xs text-destructive">{errors.phone}</p>
+                ) : (
+                  <p className="mt-1.5 text-xs text-muted-foreground">نستخدم رقمك لتأكيد موعدك فقط.</p>
+                )}
+              </div>
               {Array.from({ length: party - 1 }, (_, i) => (
                 <Input
                   key={i}
@@ -412,11 +491,29 @@ function Index() {
                       </p>
                     </>
                   )}
-                  <p className="mt-4 text-xs text-muted-foreground">
-                    {liveStatus === "pending"
-                      ? "بتتحدث الحالة لحالها لما همام يوافق. لا تسكّر الصفحة."
-                      : `الرجاء الحضور على الموعد. الحلاقة حوالي ${state.service_minutes} دقيقة للشخص.`}
-                  </p>
+                  <div className="mt-4 rounded-xl bg-card p-3 text-start text-sm leading-relaxed">
+                    {liveStatus === "pending" ? (
+                      <>
+                        <p className="font-medium">لسا ما تأكد موعدك</p>
+                        <p className="mt-1 text-muted-foreground">لا تروح للصالون قبل ما يوافق همام. هاي الصفحة بتتحدث لحالها، وتقدر ترجع لها من زر "حجزي" بأي وقت.</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-medium">موعدك مؤكد</p>
+                        <p className="mt-1 text-muted-foreground">الرجاء الحضور على الموعد. الحلاقة حوالي {state.service_minutes} دقيقة للشخص.</p>
+                      </>
+                    )}
+                  </div>
+                  {result && (
+                    <a
+                      href={bookingIcsUrl(result.start, state.service_minutes * result.party, SHOP)}
+                      download="hm-booking.ics"
+                      className="mt-3 flex h-11 items-center justify-center gap-2 rounded-xl border text-sm font-medium transition hover:bg-secondary"
+                    >
+                      <CalendarPlus className="h-4 w-4" />
+                      أضف للتقويم
+                    </a>
+                  )}
                   <button onClick={cancelMine} className="mt-4 text-sm underline underline-offset-4">إلغاء حجزي</button>
                 </>
               )}
@@ -432,6 +529,7 @@ function Index() {
 
       <MapDialog open={mapOpen} onOpenChange={setMapOpen} />
       <MyBookingDialog open={mineOpen} onOpenChange={setMineOpen} />
+      <InstallDialog open={installOpen} onOpenChange={setInstallOpen} installPrompt={installPrompt} onInstalled={() => setInstallPrompt(null)} />
     </div>
   );
 }
