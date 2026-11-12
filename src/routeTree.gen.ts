@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BarberRouteImport } from './routes/barber'
+import { Route as ApiTelegramRouteImport } from './routes/api/telegram'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const BarberRoute = BarberRouteImport.update({
   path: '/barber',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTelegramRoute = ApiTelegramRouteImport.update({
+  id: '/api/telegram',
+  path: '/api/telegram',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/barber': typeof BarberRoute
+  '/api/telegram': typeof ApiTelegramRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/barber': typeof BarberRoute
+  '/api/telegram': typeof ApiTelegramRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/barber': typeof BarberRoute
+  '/api/telegram': typeof ApiTelegramRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/barber'
+  fullPaths: '/' | '/barber' | '/api/telegram'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/barber'
-  id: '__root__' | '/' | '/barber'
+  to: '/' | '/barber' | '/api/telegram'
+  id: '__root__' | '/' | '/barber' | '/api/telegram'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BarberRoute: typeof BarberRoute
+  ApiTelegramRoute: typeof ApiTelegramRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BarberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/telegram': {
+      id: '/api/telegram'
+      path: '/api/telegram'
+      fullPath: '/api/telegram'
+      preLoaderRoute: typeof ApiTelegramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BarberRoute: BarberRoute,
+  ApiTelegramRoute: ApiTelegramRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { bookingKeyboard } from "@/lib/telegram-bot";
 
 export const notifyBooking = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
@@ -10,7 +11,7 @@ export const notifyBooking = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: b } = await supabaseAdmin
       .from("bookings")
-      .select("customer_name, phone, start_at, created_at, walk_in, party_size, status")
+      .select("id, customer_name, phone, start_at, created_at, walk_in, party_size, status")
       .eq("id", data.id)
       .maybeSingle();
     // Only notify for fresh online bookings (prevents replaying old ids)
@@ -19,12 +20,17 @@ export const notifyBooking = createServerFn({ method: "POST" })
       timeZone: "Asia/Amman", weekday: "long", day: "numeric", month: "numeric", hour: "numeric", minute: "2-digit",
     });
     const party = b.party_size > 1 ? `\n👥 ${b.party_size} أشخاص` : "";
-    const state = b.status === "pending" ? "\n⏳ بانتظار موافقتك من لوحة الحلاق" : "\n✅ مؤكد تلقائيًا";
+    const pending = b.status === "pending";
+    const state = pending ? "\n⏳ بانتظار موافقتك، اضغط أحد الزرين" : "\n✅ مؤكد تلقائيًا";
     const text = `💈 حجز جديد\n👤 ${b.customer_name}\n📞 ${b.phone ?? "-"}\n🕒 ${when}${party}${state}`;
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text }),
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        ...(pending ? { reply_markup: bookingKeyboard(b.id, b.phone) } : {}),
+      }),
     });
     if (!res.ok) console.error("Telegram send failed", res.status, await res.text());
     return { ok: res.ok };
