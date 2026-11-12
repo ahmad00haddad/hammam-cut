@@ -137,183 +137,216 @@ function Index() {
     setTick((x) => x + 1);
   }
 
-  const banner =
+  const statusLine =
     status === "off"
-      ? { cls: "bg-card", dot: "bg-destructive", text: "الحجز متوقف حاليًا" }
+      ? { dot: "bg-destructive", text: "الحجز متوقف حاليًا" }
       : status === "paused"
         ? {
-            cls: "bg-card",
-            dot: "bg-gold",
-            text: `همام باستراحة، يرجع الساعة ${fmtTime(new Date(state.pause_until!))}${state.pause_reason ? ` — ${state.pause_reason}` : ""}`,
+            dot: "bg-muted-foreground",
+            text: `همام باستراحة، يرجع الساعة ${fmtTime(new Date(state.pause_until!))}${state.pause_reason ? ` · ${state.pause_reason}` : ""}`,
           }
         : available
-          ? { cls: "border-success/50 bg-success/10", dot: "animate-pulse bg-success", text: "همام متاح الآن للحلاقة — تعال مباشرة!" }
-          : { cls: "bg-card", dot: "bg-muted-foreground", text: "احجز موعدك لتبدأ الحلاقة فور وصولك" };
+          ? { dot: "animate-pulse bg-success", text: "همام متاح الآن، تعال مباشرة" }
+          : { dot: "bg-muted-foreground", text: "احجز موعدك وتبدأ الحلاقة فور وصولك" };
 
   return (
-    <main className="mx-auto max-w-lg px-5 pb-16 pt-10">
-      <header className="relative text-center">
-        <MapButton />
-        <img src="/icon-192.png" alt="شعار صالون H&M" width={88} height={88} className="mx-auto rounded-2xl shadow-glow" />
-        <h1 className="mt-5 text-4xl font-bold text-gold">صالون H&M</h1>
-        <p className="mt-2 text-muted-foreground">مع الحلاق همام · ١٢ ظهرًا – ١٠ مساءً · الاثنين عطلة</p>
+    <div>
+      <header className="bg-primary text-primary-foreground">
+        <div className="relative mx-auto max-w-lg px-5 pb-9 pt-7">
+          <img src="/icon-192.png" alt="" width={44} height={44} className="rounded-sm" />
+          <MapButton />
+          <p className="mt-8 text-sm tracking-wide opacity-80">حلاقة رجالية · الحلاق همام</p>
+          <h1 className="mt-1 text-6xl font-bold leading-none">صالون H&M</h1>
+        </div>
       </header>
+      <div className="pole" aria-hidden="true" />
 
-      <div className={`mt-8 flex items-center justify-center gap-3 rounded-2xl border p-4 ${banner.cls}`}>
-        <span className={`h-3 w-3 shrink-0 rounded-full ${banner.dot}`} />
-        <span className="font-medium">{banner.text}</span>
-      </div>
-
-      {result ? (
-        <section className="mt-8 rounded-2xl border border-primary/40 bg-card p-6 text-center">
-          {liveStatus === "rejected" ? (
-            <>
-              <h2 className="text-2xl font-bold">تعذر قبول الحجز</h2>
-              <p className="mt-3 text-muted-foreground">نعتذر، همام ما قدر يقبل هذا الموعد. جرّب موعدًا آخر.</p>
-            </>
-          ) : liveStatus === "cancelled" ? (
-            <h2 className="text-2xl font-bold">تم إلغاء الحجز</h2>
-          ) : (
-            <>
-              <h2 className="text-2xl font-bold text-gold">
-                {liveStatus === "pending" ? "طلبك قيد المراجعة ⏳" : "تم تأكيد الحجز ✂️"}
-              </h2>
-              <p className="mt-3 text-lg">
-                {fmtDay(ammanDate(result.start)).weekday} الساعة {fmtTime(result.start)}
-                {result.party > 1 ? ` · ${result.party} أشخاص` : ""}
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {liveStatus === "pending"
-                  ? "بانتظار موافقة همام. هاي الصفحة بتتحدث لحالها، لا تسكّرها."
-                  : `الرجاء الحضور على الموعد، الحلاقة تستغرق حوالي ${state.service_minutes} دقيقة للشخص.`}
-              </p>
-              <Button variant="ghost" className="mt-3" onClick={cancelMine}>إلغاء حجزي</Button>
-            </>
-          )}
-          <Button variant="outline" className="mt-5 block w-full" onClick={() => { setResult(null); setLiveStatus(null); }}>
-            حجز موعد آخر
-          </Button>
-        </section>
-      ) : status === "off" ? null : (
-        <>
-          <section className="mt-8">
-            <h2 className="mb-3 text-lg font-bold">كم شخص؟</h2>
-            <div className="flex gap-2">
-              {Array.from({ length: state.max_party }, (_, i) => i + 1).map((n) => (
-                <button
-                  key={n}
-                  onClick={() => changeParty(n)}
-                  className={`h-12 flex-1 rounded-xl border font-bold transition ${n === party ? "border-primary bg-accent text-accent-foreground" : "bg-card"}`}
-                >
-                  {n}
-                </button>
-              ))}
+      <main className="mx-auto max-w-lg px-5 pb-16">
+        <dl className="grid grid-cols-3 divide-x divide-x-reverse divide-border border-b text-sm">
+          {[
+            ["الدوام", "١٢ ظهرًا – ١٠ ليلًا"],
+            ["العطلة", "الاثنين"],
+            ["الأسعار", "٣ – ١٠ دنانير"],
+          ].map(([k, v]) => (
+            <div key={k} className="px-3 py-4 first:ps-0 last:pe-0">
+              <dt className="text-xs text-muted-foreground">{k}</dt>
+              <dd className="mt-1 font-medium">{v}</dd>
             </div>
-            {party > 1 && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                رح نحجزلكم {party} مواعيد ورا بعض (حوالي {party * (state.service_minutes + state.buffer_minutes)} دقيقة).
-              </p>
-            )}
-          </section>
+          ))}
+        </dl>
 
-          <section className="mt-6">
-            <h2 className="mb-3 text-lg font-bold">اختر اليوم</h2>
-            <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
-              {days.map((d, i) => {
-                const f = fmtDay(d);
-                const active = d === day;
-                return (
-                  <button
-                    key={d}
-                    onClick={() => { setDay(d); setPicked(null); }}
-                    className={`min-w-[76px] shrink-0 rounded-xl border px-3 py-3 text-center transition ${
-                      active ? "border-primary bg-accent text-accent-foreground" : "bg-card"
-                    } ${isDayOff(d, state) ? "opacity-50" : ""}`}
-                  >
-                    <div className="text-xs text-muted-foreground">{i === 0 ? "اليوم" : f.weekday}</div>
-                    <div className="mt-1 font-bold">{f.date}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+        <p className="flex items-center gap-3 border-b py-4 text-sm">
+          <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${statusLine.dot}`} />
+          <span>{statusLine.text}</span>
+        </p>
 
-          <section className="mt-6">
-            <h2 className="mb-3 text-lg font-bold">اختر الوقت</h2>
-            {closed ? (
-              <p className="rounded-xl bg-card p-5 text-center text-muted-foreground">الصالون مغلق هذا اليوم</p>
-            ) : slots.length === 0 ? (
-              <p className="rounded-xl bg-card p-5 text-center text-muted-foreground">لا توجد مواعيد متبقية اليوم</p>
+        {result ? (
+          <section className="mt-8 border border-dashed border-foreground/40 p-6">
+            <p className="text-xs tracking-widest text-muted-foreground">
+              {liveStatus === "pending" ? "طلب قيد المراجعة" : liveStatus === "approved" ? "موعد مؤكد" : "حالة الحجز"}
+            </p>
+            {liveStatus === "rejected" ? (
+              <>
+                <h2 className="mt-2 text-3xl font-bold">تعذر قبول الحجز</h2>
+                <p className="mt-3 text-muted-foreground">نعتذر، همام ما قدر يقبل هذا الموعد. جرّب موعدًا آخر.</p>
+              </>
+            ) : liveStatus === "cancelled" ? (
+              <h2 className="mt-2 text-3xl font-bold">تم إلغاء الحجز</h2>
             ) : (
-              <div className="grid grid-cols-3 gap-2">
-                {slots.map((s) => {
-                  const fits = slotFits(s, party, state, ranges);
-                  const isPicked = picked?.getTime() === s.getTime();
+              <>
+                <h2 className="mt-2 text-5xl font-bold">{fmtTime(result.start)}</h2>
+                <p className="mt-2 text-lg">
+                  {fmtDay(ammanDate(result.start)).weekday}، {fmtDay(ammanDate(result.start)).date}
+                  {result.party > 1 ? ` · ${result.party} أشخاص` : ""}
+                </p>
+                <p className="mt-4 text-sm text-muted-foreground">
+                  {liveStatus === "pending"
+                    ? "بانتظار موافقة همام. هاي الصفحة بتتحدث لحالها، لا تسكّرها."
+                    : `الرجاء الحضور على الموعد. الحلاقة حوالي ${state.service_minutes} دقيقة للشخص.`}
+                </p>
+                <button onClick={cancelMine} className="mt-4 text-sm underline underline-offset-4">إلغاء حجزي</button>
+              </>
+            )}
+            <Button variant="gold" size="xl" className="mt-6 w-full" onClick={() => { setResult(null); setLiveStatus(null); }}>
+              حجز موعد آخر
+            </Button>
+          </section>
+        ) : status === "off" ? null : (
+          <>
+            <Step n="01" title="كم شخص؟">
+              <div className="flex divide-x divide-x-reverse divide-border border">
+                {Array.from({ length: state.max_party }, (_, i) => i + 1).map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => changeParty(n)}
+                    aria-pressed={n === party}
+                    className={`h-12 flex-1 font-bold transition-colors ${n === party ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              {party > 1 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  رح نحجزلكم {party} مواعيد ورا بعض، حوالي {party * (state.service_minutes + state.buffer_minutes)} دقيقة.
+                </p>
+              )}
+            </Step>
+
+            <Step n="02" title="اليوم">
+              <div className="-mx-5 flex overflow-x-auto border-y px-5">
+                {days.map((d, i) => {
+                  const f = fmtDay(d);
+                  const active = d === day;
+                  const off = isDayOff(d, state);
                   return (
                     <button
-                      key={s.getTime()}
-                      disabled={!fits}
-                      onClick={() => setPicked(s)}
-                      className={`rounded-lg border py-3 text-sm font-medium transition ${
-                        isPicked
-                          ? "bg-gold border-transparent text-primary-foreground"
-                          : !fits
-                            ? "cursor-not-allowed bg-muted text-muted-foreground line-through opacity-50"
-                            : "bg-card hover:border-primary"
-                      }`}
+                      key={d}
+                      onClick={() => { setDay(d); setPicked(null); }}
+                      aria-pressed={active}
+                      className={`min-w-[84px] shrink-0 border-e px-3 py-3 text-start transition-colors first:border-s ${
+                        active ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+                      } ${off ? "opacity-40" : ""}`}
                     >
-                      {fmtTime(s)}
+                      <div className="text-xs opacity-70">{i === 0 ? "اليوم" : f.weekday}</div>
+                      <div className="mt-1 text-lg font-bold">{f.date}</div>
                     </button>
                   );
                 })}
               </div>
+            </Step>
+
+            <Step n="03" title="الوقت">
+              {closed ? (
+                <p className="border p-5 text-muted-foreground">الصالون مغلق هذا اليوم</p>
+              ) : slots.length === 0 ? (
+                <p className="border p-5 text-muted-foreground">لا توجد مواعيد متبقية اليوم</p>
+              ) : (
+                <div className="grid grid-cols-3 gap-px border bg-border">
+                  {slots.map((s) => {
+                    const fits = slotFits(s, party, state, ranges);
+                    const isPicked = picked?.getTime() === s.getTime();
+                    return (
+                      <button
+                        key={s.getTime()}
+                        disabled={!fits}
+                        onClick={() => setPicked(s)}
+                        aria-pressed={isPicked}
+                        className={`py-3.5 text-sm font-medium transition-colors ${
+                          isPicked
+                            ? "bg-primary text-primary-foreground"
+                            : !fits
+                              ? "cursor-not-allowed bg-background text-muted-foreground/50 line-through"
+                              : "bg-background hover:bg-secondary"
+                        }`}
+                      >
+                        {fmtTime(s)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </Step>
+
+            {picked && (
+              <Step n="04" title="بياناتك">
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    الموعد: <span className="font-bold text-foreground">{fmtTime(picked)}</span>
+                    {party > 1 ? ` · ${party} أشخاص` : ""}
+                  </p>
+                  <Input placeholder="الاسم" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} className="h-12" />
+                  <Input
+                    placeholder="رقم التلفون"
+                    type="tel"
+                    inputMode="tel"
+                    dir="ltr"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    maxLength={20}
+                    className="h-12 text-right"
+                  />
+                  {Array.from({ length: party - 1 }, (_, i) => (
+                    <Input
+                      key={i}
+                      placeholder={`اسم الشخص ${i + 2} (اختياري)`}
+                      value={names[i] ?? ""}
+                      maxLength={60}
+                      className="h-12"
+                      onChange={(e) =>
+                        setNames((prev) => {
+                          const next = [...prev];
+                          next[i] = e.target.value;
+                          return next;
+                        })
+                      }
+                    />
+                  ))}
+                  <Button variant="gold" size="xl" className="w-full" disabled={busy} onClick={book}>
+                    {busy ? "جارٍ الحجز..." : "تأكيد الحجز"}
+                  </Button>
+                </div>
+              </Step>
             )}
-          </section>
+          </>
+        )}
 
-          {picked && (
-            <section className="mt-6 space-y-3 rounded-2xl border bg-card p-5">
-              <p className="font-medium">
-                الموعد: <span className="text-gold">{fmtTime(picked)}</span>
-                {party > 1 ? ` · ${party} أشخاص` : ""}
-              </p>
-              <Input placeholder="الاسم" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} className="h-12" />
-              <Input
-                placeholder="رقم التلفون"
-                type="tel"
-                inputMode="tel"
-                dir="ltr"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                maxLength={20}
-                className="h-12 text-right"
-              />
-              {Array.from({ length: party - 1 }, (_, i) => (
-                <Input
-                  key={i}
-                  placeholder={`اسم الشخص ${i + 2} (اختياري)`}
-                  value={names[i] ?? ""}
-                  maxLength={60}
-                  className="h-12"
-                  onChange={(e) =>
-                    setNames((prev) => {
-                      const next = [...prev];
-                      next[i] = e.target.value;
-                      return next;
-                    })
-                  }
-                />
-              ))}
-              <Button variant="gold" size="xl" className="w-full" disabled={busy} onClick={book}>
-                {busy ? "جارٍ الحجز..." : "تأكيد الحجز"}
-              </Button>
-            </section>
-          )}
-        </>
-      )}
+        <footer className="mt-14 border-t pt-4 text-center text-xs text-muted-foreground">
+          <Link to="/barber" className="hover:text-foreground">دخول الحلاق</Link>
+        </footer>
+      </main>
+    </div>
+  );
+}
 
-      <footer className="mt-10 text-center text-xs text-muted-foreground">
-        <Link to="/barber" className="hover:text-foreground">دخول الحلاق</Link>
-      </footer>
-    </main>
+function Step({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-9">
+      <h2 className="mb-3 flex items-baseline gap-3 text-xl font-bold">
+        <span className="text-sm font-normal tabular-nums text-muted-foreground">{n}</span>
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }

@@ -153,7 +153,7 @@ export function MapButton() {
       <DialogTrigger asChild>
         <button
           aria-label="موقع الصالون على الخريطة"
-          className="absolute end-0 top-0 flex h-11 w-11 items-center justify-center rounded-full border bg-card text-foreground shadow-glow transition hover:border-primary"
+          className="absolute end-5 top-6 flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/40 bg-black/20 text-primary-foreground transition hover:bg-black/35"
         >
           <MapIcon />
         </button>
@@ -172,7 +172,7 @@ export function MapButton() {
             <div className="text-sm text-muted-foreground">{SHOP.address}</div>
           </div>
 
-          <div className="rounded-2xl border bg-background/60 p-4">
+          <div className="rounded-md border bg-background/60 p-4">
             {state === "asking" && <p className="text-sm text-muted-foreground">جارٍ تحديد موقعك…</p>}
             {state === "ok" && km !== null && (
               <div className="flex items-center justify-between gap-3">
@@ -217,7 +217,7 @@ export function MapButton() {
             href={directionsUrl(mode)}
             target="_blank"
             rel="noreferrer"
-            className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-gold text-base font-bold text-primary-foreground shadow-glow"
+            className="flex h-14 w-full items-center justify-center gap-3 rounded-md bg-primary text-base font-bold text-primary-foreground"
           >
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 11l18-8-8 18-2-8-8-2z" />

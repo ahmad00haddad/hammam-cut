@@ -37,7 +37,7 @@
 
 :root {
   /* Brand: burgundy #641020 · charcoal #181818 · light grey #dddddc */
-  --radius: 1rem;
+  --radius: 0.375rem;
   --background: #181818;
   --foreground: #dddddc;
   --card: #202020;
@@ -58,9 +58,10 @@
   --success-foreground: #181818;
   --border: #333232;
   --input: #333232;
-  --ring: #8c2236;
-  --gradient-gold: linear-gradient(135deg, #7a1628, #641020 60%, #520c19);
-  --shadow-glow: 0 10px 40px -10px rgba(100, 16, 32, 0.7);
+  --ring: #a83248;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --gradient-gold: var(--primary);
+  --shadow-glow: none;
 }
 
 @layer base {
@@ -69,8 +70,7 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    background-image: radial-gradient(ellipse at top, rgba(100, 16, 32, 0.4), transparent 62%);
-    background-attachment: fixed;
+    background-image: var(--grain);
     min-height: 100vh;
   }
   h1, h2, h3 { font-family: var(--font-display); }
@@ -107,3 +107,13 @@
   position: absolute; inset: 3px; border-radius: 9999px;
   background: #4a9eff; box-shadow: 0 0 0 4px rgba(74, 158, 255, 0.3);
 }
+
+/* barber-pole rule: the one decorative motif */
+.pole {
+  height: 6px;
+  background: repeating-linear-gradient(-45deg, #641020 0 10px, #dddddc 10px 20px, #181818 20px 30px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hm-pin-halo { animation: none; }
+}
+* { scrollbar-width: thin; scrollbar-color: #3a3a3a transparent; }
