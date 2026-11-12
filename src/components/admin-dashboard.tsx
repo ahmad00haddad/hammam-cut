@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { Archive, BarChart3, CalendarDays, Inbox, Settings, Zap, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -133,17 +134,17 @@ export function AdminDashboard() {
     };
   }, [refreshPending]);
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "now", label: "الآن" },
-    { id: "requests", label: "الطلبات" },
-    { id: "schedule", label: "الجدول" },
-    { id: "archive", label: "الأرشيف" },
-    { id: "stats", label: "إحصائيات" },
-    { id: "settings", label: "الإعدادات" },
+  const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
+    { id: "now", label: "الآن", icon: Zap },
+    { id: "requests", label: "الطلبات", icon: Inbox },
+    { id: "schedule", label: "الجدول", icon: CalendarDays },
+    { id: "archive", label: "الأرشيف", icon: Archive },
+    { id: "stats", label: "إحصائيات", icon: BarChart3 },
+    { id: "settings", label: "الإعدادات", icon: Settings },
   ];
 
   return (
-    <main className="mx-auto max-w-lg px-5 pb-28 pt-8">
+    <main className="mx-auto max-w-lg px-5 pb-32 pt-8">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gold">أهلاً همام</h1>
@@ -161,20 +162,39 @@ export function AdminDashboard() {
         {tab === "settings" && <SettingsTab />}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-lg">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`relative flex-1 py-4 text-xs font-medium ${tab === t.id ? "text-gold" : "text-muted-foreground"}`}
-            >
-              {t.label}
-              {t.id === "requests" && pending > 0 && (
-                <span className="absolute end-1/4 top-2 rounded-full bg-destructive px-1.5 text-[10px] text-white">{pending}</span>
-              )}
-            </button>
-          ))}
+      <nav
+        aria-label="التنقل"
+        className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+      >
+        <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#181818]/95 p-2 shadow-2xl shadow-black/60 backdrop-blur">
+          {tabs.map((t) => {
+            const Icon = t.icon;
+            const active = tab === t.id;
+            const special = t.id === "requests";
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                aria-label={t.label}
+                aria-current={active ? "page" : undefined}
+                title={t.label}
+                className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 active:scale-95 ${
+                  active
+                    ? "bg-[#dddddc] text-[#181818]"
+                    : special
+                      ? "bg-primary text-primary-foreground"
+                      : "text-[#dddddc]/75 hover:text-[#dddddc]"
+                }`}
+              >
+                <Icon className="h-[22px] w-[22px]" strokeWidth={1.7} />
+                {special && pending > 0 && (
+                  <span className="absolute -end-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
+                    {pending}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </nav>
     </main>
