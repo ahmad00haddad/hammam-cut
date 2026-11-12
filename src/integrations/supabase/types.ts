@@ -66,6 +66,7 @@ export type Database = {
         Row: {
           admin_note: string | null
           cancel_notified_at: string | null
+          notified_at: string | null
           created_at: string
           customer_name: string
           decided_at: string | null
@@ -86,6 +87,7 @@ export type Database = {
         Insert: {
           admin_note?: string | null
           cancel_notified_at?: string | null
+          notified_at?: string | null
           created_at?: string
           customer_name: string
           decided_at?: string | null
@@ -106,6 +108,7 @@ export type Database = {
         Update: {
           admin_note?: string | null
           cancel_notified_at?: string | null
+          notified_at?: string | null
           created_at?: string
           customer_name?: string
           decided_at?: string | null
