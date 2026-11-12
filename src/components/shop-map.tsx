@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 // H&M salon location (from the shared Google Maps link)
 export const SHOP = {
@@ -108,18 +108,8 @@ function ShopMap({ user }: { user: Pos | null }) {
   return <div ref={el} className="hm-map absolute inset-0" />;
 }
 
-function MapIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z" />
-      <circle cx="12" cy="10" r="2.5" />
-    </svg>
-  );
-}
-
-/** Corner icon button. Opens the map and asks the visitor for their location to measure the distance. */
-export function MapButton() {
-  const [open, setOpen] = useState(false);
+/** Map dialog. On open it asks the visitor for their location to measure the distance. */
+export function MapDialog({ open, onOpenChange: setOpen }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const [user, setUser] = useState<Pos | null>(null);
   const [state, setState] = useState<"idle" | "asking" | "denied" | "unsupported" | "ok">("idle");
   const [mode, setMode] = useState<Mode>("driving");
@@ -140,24 +130,20 @@ export function MapButton() {
     );
   }
 
-  function onOpenChange(v: boolean) {
+  useEffect(() => {
+    if (open && state === "idle") locate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  function handleOpenChange(v: boolean) {
     setOpen(v);
-    if (v && state === "idle") locate();
   }
 
   const km = user ? distanceKm(user, SHOP) : null;
   const here = km !== null && km < 0.15;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <button
-          aria-label="موقع الصالون على الخريطة"
-          className="absolute end-0 top-0 flex h-11 w-11 items-center justify-center rounded-full border bg-card text-foreground shadow-glow transition hover:border-primary"
-        >
-          <MapIcon />
-        </button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
         <DialogTitle className="sr-only">موقع الصالون</DialogTitle>
         <DialogDescription className="sr-only">خريطة موقع صالون H&M والمسافة والاتجاهات</DialogDescription>
