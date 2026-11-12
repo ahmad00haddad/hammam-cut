@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { notifyBooking } from "@/lib/telegram.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ShopMap } from "@/components/shop-map";
 import {
   DEFAULT_STATE,
   type PublicState,
@@ -309,7 +310,12 @@ function Index() {
         </>
       )}
 
-      <footer className="mt-12 text-center text-xs text-muted-foreground">
+      <section className="mt-12">
+        <h2 className="mb-3 text-lg font-bold">موقع الصالون</h2>
+        <ShopMap />
+      </section>
+
+      <footer className="mt-10 text-center text-xs text-muted-foreground">
         <Link to="/barber" className="hover:text-foreground">دخول الحلاق</Link>
       </footer>
     </main>
