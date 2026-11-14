@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { csvRow } from "@/lib/csv";
 import { Button } from "@/components/ui/button";
 import { RazorMark } from "@/components/razor-mark";
+import { PushToggle } from "@/components/push-toggle";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -155,6 +156,8 @@ export function AdminDashboard() {
         <RazorMark className="h-5 w-auto shrink-0 text-foreground/60" />
         <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>خروج</Button>
       </header>
+
+      <div className="mt-4"><PushToggle /></div>
 
       <div className="mt-6">
         {tab === "now" && <NowTab />}

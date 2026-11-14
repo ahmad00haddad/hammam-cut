@@ -1,13 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { bookingKeyboard } from "@/lib/telegram-bot";
+import { sendPushToBarber } from "@/lib/push.server";
 
 export const notifyBooking = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     const token = process.env["TELEGRAM_BOT_TOKEN"];
     const chatId = process.env["TELEGRAM_CHAT_ID"];
-    if (!token || !chatId) return { ok: false };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: b } = await supabaseAdmin
       .from("bookings")
@@ -32,6 +32,12 @@ export const notifyBooking = createServerFn({ method: "POST" })
     const pending = b.status === "pending";
     const state = pending ? "\n⏳ بانتظار موافقتك، اضغط أحد الزرين" : "\n✅ مؤكد تلقائيًا";
     const text = `💈 حجز جديد\n👤 ${b.customer_name}\n📞 ${b.phone ?? "-"}\n🕒 ${when}${party}${state}`;
+    await sendPushToBarber({
+      title: pending ? "💈 حجز جديد بانتظار موافقتك" : "💈 حجز جديد",
+      body: `${b.customer_name} — ${when}${b.party_size > 1 ? ` (${b.party_size} أشخاص)` : ""}`,
+      tag: `booking-${b.id}`,
+    });
+    if (!token || !chatId) return { ok: true };
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -54,7 +60,6 @@ export const notifyCancel = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const bot = process.env["TELEGRAM_BOT_TOKEN"];
     const chatId = process.env["TELEGRAM_CHAT_ID"];
-    if (!bot || !chatId) return { ok: false };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: b } = await supabaseAdmin
       .from("bookings")
@@ -74,6 +79,8 @@ export const notifyCancel = createServerFn({ method: "POST" })
       timeZone: "Asia/Amman", weekday: "long", day: "numeric", month: "numeric", hour: "numeric", minute: "2-digit",
     });
     const party = b.party_size > 1 ? ` (${b.party_size} أشخاص)` : "";
+    await sendPushToBarber({ title: "🚫 إلغاء حجز", body: `${b.customer_name}${party} — ${when}`, tag: `cancel-${b.id}` });
+    if (!bot || !chatId) return { ok: true };
     const res = await fetch(`https://api.telegram.org/bot${bot}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
