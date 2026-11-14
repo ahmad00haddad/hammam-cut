@@ -157,8 +157,6 @@ export function AdminDashboard() {
         <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>خروج</Button>
       </header>
 
-      <div className="mt-4"><PushToggle /></div>
-
       <div className="mt-6">
         {tab === "now" && <NowTab />}
         {tab === "requests" && <RequestsTab onChange={refreshPending} />}
@@ -828,6 +826,10 @@ function SettingsTab() {
 
   return (
     <div className="space-y-5">
+      <section className="space-y-3 rounded-2xl border bg-card p-4">
+        <h2 className="font-bold">الإشعارات</h2>
+        <PushToggle />
+      </section>
       <section className="space-y-3 rounded-2xl border bg-card p-4">
         <h2 className="font-bold">الحجز</h2>
         {field("موافقة تلقائية على الحجوزات", <Switch checked={f.auto_approve} onCheckedChange={(v) => set("auto_approve", v)} />)}
