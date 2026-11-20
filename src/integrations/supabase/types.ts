@@ -14,30 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      push_subscriptions: {
-        Row: {
-          auth: string
-          created_at: string
-          endpoint: string
-          p256dh: string
-          user_id: string
-        }
-        Insert: {
-          auth: string
-          created_at?: string
-          endpoint: string
-          p256dh: string
-          user_id?: string
-        }
-        Update: {
-          auth?: string
-          created_at?: string
-          endpoint?: string
-          p256dh?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       blocked_clients: {
         Row: {
           created_at: string
@@ -90,7 +66,6 @@ export type Database = {
         Row: {
           admin_note: string | null
           cancel_notified_at: string | null
-          notified_at: string | null
           created_at: string
           customer_name: string
           decided_at: string | null
@@ -111,12 +86,11 @@ export type Database = {
         Insert: {
           admin_note?: string | null
           cancel_notified_at?: string | null
-          notified_at?: string | null
           created_at?: string
           customer_name: string
           decided_at?: string | null
           device_id?: string | null
-          end_at?: string
+          end_at: string
           id?: string
           ip_hash?: string | null
           party_names?: string[] | null
@@ -132,7 +106,6 @@ export type Database = {
         Update: {
           admin_note?: string | null
           cancel_notified_at?: string | null
-          notified_at?: string | null
           created_at?: string
           customer_name?: string
           decided_at?: string | null
@@ -149,6 +122,30 @@ export type Database = {
           start_at?: string
           status?: string
           walk_in?: boolean
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          p256dh: string
+          user_id?: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          p256dh?: string
+          user_id?: string
         }
         Relationships: []
       }
