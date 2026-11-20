@@ -182,7 +182,7 @@ export function AdminDashboard() {
                 aria-label={t.label}
                 aria-current={active ? "page" : undefined}
                 title={t.label}
-                className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 active:scale-95 ${
+                className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 elastic-press ${
                   active
                     ? "bg-[#dddddc] text-[#181818]"
                     : special

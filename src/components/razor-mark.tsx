@@ -67,7 +67,7 @@ export function RazorMark({
           /* vibration is optional */
         }
       }}
-      className={`rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-95 transition-transform ${buttonClassName ?? ""}`}
+      className={`rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background elastic-press ${buttonClassName ?? ""}`}
     >
       {svg}
     </button>

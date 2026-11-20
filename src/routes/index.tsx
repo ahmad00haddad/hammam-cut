@@ -344,7 +344,7 @@ function Index() {
                   key={n}
                   onClick={() => changeParty(n)}
                   aria-pressed={n === party}
-                  className={`h-12 flex-1 rounded-xl text-base font-bold transition active:scale-95 ${n === party ? "bg-primary text-primary-foreground" : "bg-card"}`}
+                  className={`h-12 flex-1 rounded-xl text-base font-bold transition elastic-press ${n === party ? "bg-primary text-primary-foreground" : "bg-card"}`}
                 >
                   {n}
                 </button>
@@ -365,7 +365,7 @@ function Index() {
                     key={d}
                     onClick={() => { setDay(d); setDayTouched(true); setPicked(null); }}
                     aria-pressed={active}
-                    className={`min-w-[64px] flex-1 shrink-0 rounded-2xl px-3 py-3 text-center transition active:scale-95 ${
+                    className={`min-w-[64px] flex-1 shrink-0 rounded-2xl px-3 py-3 text-center transition elastic-press ${
                       active ? "bg-primary text-primary-foreground" : "bg-card"
                     } ${off ? "opacity-40" : ""}`}
                   >
@@ -391,19 +391,19 @@ function Index() {
                 <Home className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px] font-medium">الرئيسية</span>
               </span>
-              <button onClick={() => setMineOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setMineOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground elastic-press">
                 <Ticket className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px]">حجزي</span>
               </button>
-              <button onClick={() => setMapOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setMapOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground elastic-press">
                 <MapPin className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px]">الموقع</span>
               </button>
-              <button onClick={() => setInstallOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setInstallOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground elastic-press">
                 <Download className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px]">تحميل</span>
               </button>
-              <button onClick={() => setQrOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground active:scale-95">
+              <button onClick={() => setQrOpen(true)} className="flex h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-foreground/75 transition hover:text-foreground elastic-press">
                 <QrCode className="h-5 w-5" strokeWidth={1.7} />
                 <span className="text-[11px]">QR</span>
               </button>
@@ -436,7 +436,7 @@ function Index() {
                       disabled={!fits}
                       onClick={() => setPicked(s)}
                       aria-pressed={isPicked}
-                      className={`rounded-xl px-4 py-3 text-sm font-medium transition active:scale-95 ${
+                      className={`rounded-xl px-4 py-3 text-sm font-medium transition elastic-press ${
                         isPicked
                           ? "bg-primary text-primary-foreground"
                           : !fits
@@ -541,7 +541,7 @@ function Index() {
                 <h1 className="text-2xl font-bold">تم إلغاء الحجز</h1>
               ) : (
                 <>
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <div className="settle-in mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
                     <Check className="h-6 w-6" />
                   </div>
                   <h1 className="mt-4 text-2xl font-bold">{liveStatus === "pending" ? "طلبك قيد المراجعة" : "تم تأكيد الحجز"}</h1>
