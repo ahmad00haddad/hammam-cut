@@ -15,6 +15,13 @@
       "when": 1794500157170,
       "tag": "0001_booking_system",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795206827985,
+      "tag": "0002_add_notified_at_to_bookings",
+      "breakpoints": true
     }
   ]
 }

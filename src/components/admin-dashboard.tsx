@@ -157,7 +157,7 @@ export function AdminDashboard() {
         <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>خروج</Button>
       </header>
 
-      <div className="mt-6">
+      <div key={tab} className="mt-6 rise-in">
         {tab === "now" && <NowTab />}
         {tab === "requests" && <RequestsTab onChange={refreshPending} />}
         {tab === "schedule" && <ScheduleTab />}
@@ -192,7 +192,7 @@ export function AdminDashboard() {
               >
                 <Icon className="h-[22px] w-[22px]" strokeWidth={1.7} />
                 {special && pending > 0 && (
-                  <span className="absolute -end-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
+                  <span key={pending} className="elastic-dot absolute -end-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
                     {pending}
                   </span>
                 )}
@@ -525,7 +525,7 @@ function ScheduleTab() {
         {days.map((d, i) => {
           const f = fmtDay(d);
           return (
-            <button key={d} onClick={() => setDay(d)} className={`min-w-[72px] shrink-0 rounded-xl border px-3 py-2 text-center ${d === day ? "border-primary bg-accent" : "bg-card"}`}>
+            <button key={d} onClick={() => setDay(d)} aria-pressed={d === day} className={`min-w-[72px] shrink-0 rounded-xl border px-3 py-2 text-center elastic-press ${d === day ? "border-primary bg-accent" : "bg-card"}`}>
               <div className="text-xs text-muted-foreground">{i === 0 ? "اليوم" : f.weekday}</div>
               <div className="text-sm font-bold">{f.date}</div>
             </button>
@@ -636,7 +636,7 @@ function ArchiveTab() {
       </div>
       <div className="flex flex-wrap gap-2">
         {["all", "done", "no_show", "cancelled", "rejected", "approved"].map((s) => (
-          <button key={s} onClick={() => setStatus(s)} className={`rounded-full border px-3 py-1 text-xs ${status === s ? "border-primary bg-accent" : "bg-card"}`}>
+          <button key={s} onClick={() => setStatus(s)} aria-pressed={status === s} className={`rounded-full border px-3 py-1 text-xs elastic-press ${status === s ? "border-primary bg-accent" : "bg-card"}`}>
             {s === "all" ? "الكل" : STATUS_AR[s]}
           </button>
         ))}
@@ -719,7 +719,7 @@ function StatsTab() {
     <div className="space-y-4">
       <div className="flex gap-2">
         {[7, 30, 90].map((r) => (
-          <button key={r} onClick={() => setRange(r)} className={`flex-1 rounded-xl border py-2 text-sm ${range === r ? "border-primary bg-accent" : "bg-card"}`}>
+          <button key={r} onClick={() => setRange(r)} aria-pressed={range === r} className={`flex-1 rounded-xl border py-2 text-sm elastic-press ${range === r ? "border-primary bg-accent" : "bg-card"}`}>
             {r} يوم
           </button>
         ))}
@@ -855,7 +855,7 @@ function SettingsTab() {
               <button
                 key={n}
                 onClick={() => set("days_off", off ? f.days_off.filter((x) => x !== n) : [...f.days_off, n])}
-                className={`rounded-full border px-3 py-1 text-xs ${off ? "border-destructive bg-destructive/10" : "bg-card"}`}
+                className={`rounded-full border px-3 py-1 text-xs elastic-press ${off ? "border-destructive bg-destructive/10" : "bg-card"}`}
               >
                 {label}
               </button>
