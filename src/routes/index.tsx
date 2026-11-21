@@ -282,7 +282,7 @@ function Index() {
 
   const canBook = status !== "off";
   const screenClass = (i: number) =>
-    `absolute inset-0 flex flex-col transition-transform duration-[450ms] ease-[cubic-bezier(.2,0,0,1)] motion-reduce:transition-none ${
+    `absolute inset-0 flex flex-col transition-transform duration-[550ms] ease-[cubic-bezier(0.34,1.3,0.64,1)] motion-reduce:transition-none ${
       i === step ? "" : "pointer-events-none"
     }`;
   const screenStyle = (i: number) => ({ transform: `translateX(${-(i - step) * 100}%)` });
@@ -306,7 +306,7 @@ function Index() {
               {[0, 1, 2].map((i) => (
                 <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-border">
                   <div
-                    className="h-full rounded-full bg-primary transition-[width] duration-[450ms] ease-[cubic-bezier(.2,0,0,1)] motion-reduce:transition-none"
+                    className="h-full rounded-full bg-primary transition-[width] duration-[550ms] ease-[cubic-bezier(0.34,1.3,0.64,1)] motion-reduce:transition-none"
                     style={{ width: i <= step || step === 3 ? "100%" : "0%" }}
                   />
                 </div>
@@ -351,7 +351,9 @@ function Index() {
               ))}
             </div>
             <p className="mt-2 min-h-4 text-xs text-muted-foreground">
-              {party > 1 ? `رح نحجزلكم ${party} مواعيد ورا بعض، حوالي ${party * (state.service_minutes + state.buffer_minutes)} دقيقة.` : ""}
+              <span key={party} className="elastic-bump">
+                {party > 1 ? `رح نحجزلكم ${party} مواعيد ورا بعض، حوالي ${party * (state.service_minutes + state.buffer_minutes)} دقيقة.` : ""}
+              </span>
             </p>
 
             <h2 className="mt-4 text-lg font-bold">اليوم</h2>
@@ -426,7 +428,7 @@ function Index() {
             ) : slots.length === 0 ? (
               <p className="mt-6 rounded-xl bg-card p-5 text-center text-muted-foreground">لا توجد مواعيد متبقية اليوم. جرّب يوم ثاني.</p>
             ) : (
-              <div className="mt-6 flex flex-wrap gap-2.5">
+              <div key={`${day}-${party}`} className="rise-in mt-6 flex flex-wrap gap-2.5">
                 {slots.map((s) => {
                   const fits = slotFits(s, party, state, ranges);
                   const isPicked = picked?.getTime() === s.getTime();
