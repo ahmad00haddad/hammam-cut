@@ -89,7 +89,7 @@ export function InstallDialog({
                   role="tab"
                   aria-selected={tab === t.id}
                   onClick={() => setTab(t.id)}
-                  className={`h-10 flex-1 rounded-lg text-sm font-medium transition ${tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                  className={`h-10 flex-1 rounded-lg text-sm font-medium transition elastic-press ${tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
                 >
                   {t.label}
                   {info.platform === t.id && <span className="ms-1 text-[10px] opacity-70">(جهازك)</span>}

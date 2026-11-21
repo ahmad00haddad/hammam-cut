@@ -356,9 +356,9 @@ function NowTab() {
 
       <section className="space-y-2 rounded-2xl border bg-card p-5">
         <h2 className="font-bold">التالي</h2>
-        {next.length === 0 && <p className="text-sm text-muted-foreground">لا يوجد حجوزات قادمة</p>}
+        {next.length === 0 && <p className="settle-in text-sm text-muted-foreground">لا يوجد حجوزات قادمة</p>}
         {next.map((b) => (
-          <div key={b.id} className="flex items-center gap-3">
+          <div key={b.id} className="rise-in flex items-center gap-3">
             <span className="w-16 font-bold text-gold">{fmtTime(new Date(b.start_at))}</span>
             <span className="flex-1">
               {b.customer_name}
@@ -383,7 +383,7 @@ function NowTab() {
           {showQr ? "إخفاء رمز QR" : "رمز QR لتنزيل التطبيق"}
         </Button>
         {showQr && (
-          <div className="mt-4 space-y-3">
+          <div className="rise-in mt-4 space-y-3">
             <div className="mx-auto w-fit rounded-xl bg-foreground p-4">
               <QRCodeSVG value={appUrl} size={220} />
             </div>
@@ -443,9 +443,9 @@ function RequestsTab({ onChange }: { onChange: () => void }) {
         <h2 className="font-bold">طلبات بانتظار الموافقة ({rows.length})</h2>
         {rows.length > 1 && <Button size="sm" variant="outline" onClick={approveAll}>موافقة على الكل</Button>}
       </div>
-      {rows.length === 0 && <p className="rounded-xl bg-card p-5 text-center text-muted-foreground">لا توجد طلبات</p>}
+      {rows.length === 0 && <p className="settle-in rounded-xl bg-card p-5 text-center text-muted-foreground">لا توجد طلبات</p>}
       {rows.map((b) => (
-        <div key={b.id} className="space-y-3 rounded-xl border bg-card p-4">
+        <div key={b.id} className="rise-in space-y-3 rounded-xl border bg-card p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="font-bold">
@@ -535,11 +535,11 @@ function ScheduleTab() {
 
       <section className="space-y-2">
         <h2 className="font-bold">المواعيد ({active.length})</h2>
-        {active.length === 0 && <p className="rounded-xl bg-card p-5 text-center text-muted-foreground">لا توجد حجوزات</p>}
+        {active.length === 0 && <p className="settle-in rounded-xl bg-card p-5 text-center text-muted-foreground">لا توجد حجوزات</p>}
         {active.map((b) => {
           const wa = waLink(b.phone);
           return (
-            <div key={b.id} className="space-y-2 rounded-xl border bg-card p-3">
+            <div key={b.id} className="rise-in space-y-2 rounded-xl border bg-card p-3">
               <div className="flex items-center gap-3">
                 <div className="w-16 text-center font-bold text-gold">{fmtTime(new Date(b.start_at))}</div>
                 <div className="flex-1">

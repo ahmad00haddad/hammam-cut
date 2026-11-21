@@ -298,7 +298,7 @@ function Index() {
             <button
               onClick={goBack}
               aria-label="رجوع"
-              className={`flex h-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary transition-all duration-300 ${step > 0 && step < 3 ? "w-8 opacity-100" : "pointer-events-none -me-3 w-0 opacity-0"}`}
+              className={`flex h-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary transition-all duration-300 elastic-press ${step > 0 && step < 3 ? "w-8 opacity-100" : "pointer-events-none -me-3 w-0 opacity-0"}`}
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -333,7 +333,7 @@ function Index() {
             <p className="mt-1 text-sm text-muted-foreground">الدوام ١٢ ظهرًا – ١٠ ليلًا · الاثنين عطلة</p>
             <p className="text-sm text-muted-foreground">الأسعار من ٣ إلى ١٠ دنانير حسب الخدمة</p>
             <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm">
-              <span className={`h-2 w-2 shrink-0 rounded-full ${statusChip.dot}`} />
+              <span key={statusChip.text} className={`elastic-dot h-2 w-2 shrink-0 rounded-full ${statusChip.dot}`} />
               {statusChip.text}
             </p>
 
