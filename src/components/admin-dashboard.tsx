@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Archive, BarChart3, CalendarDays, Inbox, Settings, Zap, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { RazorMark } from "@/components/razor-mark";
 import { PushToggle } from "@/components/push-toggle";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { SlidingPill } from "@/components/sliding-pill";
 import {
   DEFAULT_STATE,
   type PublicState,
@@ -518,16 +519,18 @@ function ScheduleTab() {
 
   const active = rows.filter((r) => r.status === "approved" || r.status === "pending");
   const finished = rows.filter((r) => r.status === "done").length;
+  const daysRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="space-y-4">
-      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
+      <div ref={daysRef} className="relative -mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
+        <SlidingPill containerRef={daysRef} activeKey={day} className="rounded-xl border border-primary bg-accent" />
         {days.map((d, i) => {
           const f = fmtDay(d);
           return (
-            <button key={d} onClick={() => setDay(d)} aria-pressed={d === day} className={`min-w-[72px] shrink-0 rounded-xl border px-3 py-2 text-center elastic-press ${d === day ? "border-primary bg-accent" : "bg-card"}`}>
-              <div className="text-xs text-muted-foreground">{i === 0 ? "اليوم" : f.weekday}</div>
-              <div className="text-sm font-bold">{f.date}</div>
+            <button key={d} onClick={() => setDay(d)} aria-pressed={d === day} data-active={d === day ? "true" : undefined} className={`min-w-[72px] shrink-0 rounded-xl border px-3 py-2 text-center elastic-press ${d === day ? "border-transparent bg-card/0" : "bg-card"}`}>
+              <div className="relative z-[2] text-xs text-muted-foreground">{i === 0 ? "اليوم" : f.weekday}</div>
+              <div className="relative z-[2] text-sm font-bold">{f.date}</div>
             </button>
           );
         })}
@@ -625,6 +628,7 @@ function ArchiveTab() {
     a.click();
     URL.revokeObjectURL(a.href);
   }
+  const statusRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="space-y-3">
@@ -634,10 +638,11 @@ function ArchiveTab() {
         <Input type="date" value={fromD} onChange={(e) => setFromD(e.target.value)} className="h-11" />
         <Input type="date" value={toD} onChange={(e) => setToD(e.target.value)} className="h-11" />
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div ref={statusRef} className="relative flex flex-wrap gap-2">
+        <SlidingPill containerRef={statusRef} activeKey={status} className="rounded-full border border-primary bg-accent" />
         {["all", "done", "no_show", "cancelled", "rejected", "approved"].map((s) => (
-          <button key={s} onClick={() => setStatus(s)} aria-pressed={status === s} className={`rounded-full border px-3 py-1 text-xs elastic-press ${status === s ? "border-primary bg-accent" : "bg-card"}`}>
-            {s === "all" ? "الكل" : STATUS_AR[s]}
+          <button key={s} onClick={() => setStatus(s)} aria-pressed={status === s} data-active={status === s ? "true" : undefined} className={`rounded-full border px-3 py-1 text-xs elastic-press ${status === s ? "border-transparent bg-card/0" : "bg-card"}`}>
+            <span className="relative z-[2]">{s === "all" ? "الكل" : STATUS_AR[s]}</span>
           </button>
         ))}
       </div>
@@ -714,13 +719,15 @@ function StatsTab() {
 
   const attended = st ? st.done + st.no_show : 0;
   const rate = st && attended > 0 ? Math.round((st.done / attended) * 100) : null;
+  const rangeRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
+      <div ref={rangeRef} className="relative flex gap-2">
+        <SlidingPill containerRef={rangeRef} activeKey={range} className="rounded-xl border border-primary bg-accent" />
         {[7, 30, 90].map((r) => (
-          <button key={r} onClick={() => setRange(r)} aria-pressed={range === r} className={`flex-1 rounded-xl border py-2 text-sm elastic-press ${range === r ? "border-primary bg-accent" : "bg-card"}`}>
-            {r} يوم
+          <button key={r} onClick={() => setRange(r)} aria-pressed={range === r} data-active={range === r ? "true" : undefined} className={`flex-1 rounded-xl border py-2 text-sm elastic-press ${range === r ? "border-transparent bg-card/0" : "bg-card"}`}>
+            <span className="relative z-[2]">{r} يوم</span>
           </button>
         ))}
       </div>

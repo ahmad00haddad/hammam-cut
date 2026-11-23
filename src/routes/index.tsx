@@ -1,6 +1,6 @@
 import { RazorMark } from "@/components/razor-mark";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, CalendarPlus, Check, Download, Home, MapPin, QrCode, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { bookingIcsUrl } from "@/lib/calendar";
 import { MyBookingDialog, TOKEN_KEY } from "@/components/my-booking";
 import { QrDialog } from "@/components/qr-dialog";
 import { InstallDialog, type InstallPrompt } from "@/components/install-dialog";
+import { SlidingPill } from "@/components/sliding-pill";
 import {
   DEFAULT_STATE,
   type PublicState,
@@ -94,6 +95,9 @@ function Index() {
   const [qrOpen, setQrOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
+  const partyRef = useRef<HTMLDivElement>(null);
+  const dayRef = useRef<HTMLDivElement>(null);
+  const slotsRef = useRef<HTMLDivElement>(null);
 
   // returning customer: restore saved details (after mount, to avoid SSR mismatch)
   useEffect(() => {
@@ -338,15 +342,17 @@ function Index() {
             </p>
 
             <h2 className="mt-7 text-lg font-bold">كم شخص؟</h2>
-            <div className="mt-3 flex gap-2">
+            <div ref={partyRef} className="relative mt-3 flex gap-2">
+              <SlidingPill containerRef={partyRef} activeKey={party} className="rounded-xl bg-primary" />
               {Array.from({ length: state.max_party }, (_, i) => i + 1).map((n) => (
                 <button
                   key={n}
                   onClick={() => changeParty(n)}
                   aria-pressed={n === party}
-                  className={`h-12 flex-1 rounded-xl text-base font-bold transition elastic-press ${n === party ? "bg-primary text-primary-foreground" : "bg-card"}`}
+                  data-active={n === party ? "true" : undefined}
+                  className={`h-12 flex-1 rounded-xl text-base font-bold transition elastic-press ${n === party ? "bg-card/0 text-primary-foreground" : "bg-card"}`}
                 >
-                  {n}
+                  <span className="relative z-[2]">{n}</span>
                 </button>
               ))}
             </div>
@@ -357,7 +363,8 @@ function Index() {
             </p>
 
             <h2 className="mt-4 text-lg font-bold">اليوم</h2>
-            <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2">
+            <div ref={dayRef} className="no-scrollbar relative -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2">
+              <SlidingPill containerRef={dayRef} activeKey={day} className="rounded-2xl bg-primary" />
               {days.map((d, i) => {
                 const f = fmtDay(d);
                 const active = d === day;
@@ -367,12 +374,13 @@ function Index() {
                     key={d}
                     onClick={() => { setDay(d); setDayTouched(true); setPicked(null); }}
                     aria-pressed={active}
+                    data-active={active ? "true" : undefined}
                     className={`min-w-[64px] flex-1 shrink-0 rounded-2xl px-3 py-3 text-center transition elastic-press ${
-                      active ? "bg-primary text-primary-foreground" : "bg-card"
+                      active ? "bg-card/0 text-primary-foreground" : "bg-card"
                     } ${off ? "opacity-40" : ""}`}
                   >
-                    <div className={`text-xs ${active ? "opacity-80" : "text-muted-foreground"}`}>{i === 0 ? "اليوم" : f.weekday}</div>
-                    <div className="mt-1 text-xl font-bold">{f.num}</div>
+                    <div className={`relative z-[2] text-xs ${active ? "opacity-80" : "text-muted-foreground"}`}>{i === 0 ? "اليوم" : f.weekday}</div>
+                    <div className="relative z-[2] mt-1 text-xl font-bold">{f.num}</div>
                   </button>
                 );
               })}
@@ -428,7 +436,8 @@ function Index() {
             ) : slots.length === 0 ? (
               <p className="mt-6 rounded-xl bg-card p-5 text-center text-muted-foreground">لا توجد مواعيد متبقية اليوم. جرّب يوم ثاني.</p>
             ) : (
-              <div key={`${day}-${party}`} className="rise-in mt-6 flex flex-wrap gap-2.5">
+              <div ref={slotsRef} key={`${day}-${party}`} className="rise-in relative mt-6 flex flex-wrap gap-2.5">
+                <SlidingPill containerRef={slotsRef} activeKey={picked?.getTime() ?? null} className="rounded-xl bg-primary" />
                 {slots.map((s) => {
                   const fits = slotFits(s, party, state, ranges);
                   const isPicked = picked?.getTime() === s.getTime();
@@ -438,15 +447,16 @@ function Index() {
                       disabled={!fits}
                       onClick={() => setPicked(s)}
                       aria-pressed={isPicked}
+                      data-active={isPicked ? "true" : undefined}
                       className={`rounded-xl px-4 py-3 text-sm font-medium transition elastic-press ${
                         isPicked
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-card/0 text-primary-foreground"
                           : !fits
                             ? "cursor-not-allowed bg-card/50 text-muted-foreground/50 line-through"
                             : "bg-card"
                       }`}
                     >
-                      {fmtTime(s)}
+                      <span className="relative z-[2]">{fmtTime(s)}</span>
                     </button>
                   );
                 })}

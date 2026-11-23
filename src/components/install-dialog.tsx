@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Download, EllipsisVertical, MoreHorizontal, Plus, Share, SquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { SlidingPill } from "@/components/sliding-pill";
 
 export type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 
@@ -52,6 +53,7 @@ export function InstallDialog({
 }) {
   const [info, setInfo] = useState(() => detectPlatform());
   const [tab, setTab] = useState<Platform>("android");
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -82,17 +84,21 @@ export function InstallDialog({
           <p className="rounded-xl bg-card p-4 text-center">التطبيق مثبّت عندك أصلاً. تقدر تفتحه من شاشتك الرئيسية.</p>
         ) : (
           <>
-            <div className="flex gap-1 rounded-xl bg-card p-1" role="tablist" aria-label="نوع الجهاز">
+            <div ref={tabsRef} className="relative flex gap-1 rounded-xl bg-card p-1" role="tablist" aria-label="نوع الجهاز">
+              <SlidingPill containerRef={tabsRef} activeKey={tab} className="rounded-lg bg-primary" />
               {TABS.map((t) => (
                 <button
                   key={t.id}
                   role="tab"
                   aria-selected={tab === t.id}
+                  data-active={tab === t.id ? "true" : undefined}
                   onClick={() => setTab(t.id)}
-                  className={`h-10 flex-1 rounded-lg text-sm font-medium transition elastic-press ${tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                  className={`h-10 flex-1 rounded-lg text-sm font-medium transition elastic-press ${tab === t.id ? "text-primary-foreground" : "text-muted-foreground"}`}
                 >
-                  {t.label}
-                  {info.platform === t.id && <span className="ms-1 text-[10px] opacity-70">(جهازك)</span>}
+                  <span className="relative z-[2]">
+                    {t.label}
+                    {info.platform === t.id && <span className="ms-1 text-[10px] opacity-70">(جهازك)</span>}
+                  </span>
                 </button>
               ))}
             </div>

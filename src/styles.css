@@ -141,7 +141,7 @@
 }
 .elastic-press { transition: scale 0.5s var(--ease-elastic), translate 0.6s var(--ease-elastic), background-color 0.15s ease, color 0.15s ease; }
 .elastic-press:active { scale: 0.92 0.94; transition-duration: 0.1s, 0.6s, 0.15s, 0.15s; }
-.elastic-press[aria-pressed="true"] { translate: 0 -2px; }
+.elastic-press[aria-pressed="true"]:not([data-active="true"]) { translate: 0 -2px; }
 .elastic-bump { display: inline-block; animation: elastic-bump 0.5s var(--ease-elastic); }
 @keyframes elastic-bump { 0% { scale: 1; } 35% { scale: 1.12; } 100% { scale: 1; } }
 .elastic-dot { animation: elastic-dot 0.45s var(--ease-elastic) both; }
@@ -154,6 +154,14 @@
 @keyframes alert-in { from { translate: 0 -4px; opacity: 0; } to { translate: 0 0; opacity: 1; } }
 .elastic-modal { animation: modal-in 0.45s var(--ease-elastic) both; }
 @keyframes modal-in { from { scale: 0.9; opacity: 0; } to { scale: 1; opacity: 1; } }
+.elastic-pill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  transition: translate 0.5s var(--ease-elastic), width 0.5s var(--ease-elastic), height 0.5s var(--ease-elastic), opacity 0.2s ease;
+  will-change: translate, width, height;
+}
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), textarea, select {
   transition: box-shadow 0.4s var(--ease-elastic), border-color 0.2s ease;
 }
@@ -161,6 +169,6 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 [role="switch"] > span { transition: translate 0.5s var(--ease-elastic), scale 0.4s var(--ease-elastic); }
 [role="switch"]:active > span { scale: 1.2 0.9; transition-duration: 0.5s, 0.12s; }
 @media (prefers-reduced-motion: reduce) {
-  .elastic-press, .elastic-press:active, .elastic-press[aria-pressed="true"], [role="switch"] > span, [role="switch"]:active > span { transition: none; scale: none; translate: none; }
+  .elastic-press, .elastic-press:active, .elastic-press[aria-pressed="true"], .elastic-pill, [role="switch"] > span, [role="switch"]:active > span { transition: none; scale: none; translate: none; }
   .elastic-bump, .elastic-dot, .elastic-modal, .settle-in, .rise-in, [role="alert"] { animation: none; }
 }
