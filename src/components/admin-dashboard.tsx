@@ -597,6 +597,7 @@ function ArchiveTab() {
   const [status, setStatus] = useState("all");
   const [fromD, setFromD] = useState("");
   const [toD, setToD] = useState("");
+  const [visible, setVisible] = useState(5);
 
   const load = useCallback(async () => {
     let query = supabase.from("bookings").select("*").lt("start_at", new Date().toISOString()).order("start_at", { ascending: false }).limit(300);
@@ -607,8 +608,12 @@ function ArchiveTab() {
     setRows((data as unknown as Booking[]) ?? []);
   }, [status, fromD, toD]);
   useEffect(() => {
+    setVisible(5);
     load();
   }, [load]);
+  useEffect(() => {
+    setVisible(5);
+  }, [q]);
 
   const shown = rows.filter((r) => {
     const t = q.trim().toLowerCase();
@@ -647,10 +652,10 @@ function ArchiveTab() {
         ))}
       </div>
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>{shown.length} حجز</span>
+        <span>{shown.length > visible ? `عرض ${visible} من ${shown.length} حجز` : `${shown.length} حجز`}</span>
         <Button size="sm" variant="outline" onClick={exportCsv}>تصدير CSV</Button>
       </div>
-      {shown.map((r) => {
+      {shown.slice(0, visible).map((r) => {
         const d = new Date(r.start_at);
         return (
           <div key={r.id} className="flex items-center gap-3 rounded-xl border bg-card p-3 text-sm">
@@ -666,6 +671,11 @@ function ArchiveTab() {
           </div>
         );
       })}
+      {shown.length > visible && (
+        <Button variant="outline" className="elastic-press w-full" onClick={() => setVisible((v) => v + 10)}>
+          عرض المزيد ({shown.length - visible})
+        </Button>
+      )}
     </div>
   );
 }
